@@ -20,7 +20,7 @@ pnpm fit:dump <file> [mesgKey]   # every FIT message/field as decoded by @garmin
 pnpm fit:sets <file>       # parsed set table (compare with Garmin Connect)
 ```
 
-Local env: `cp .env.example .env`. The API validates env with zod at startup (`apps/api/src/env.ts`).
+Local env: `cp .env.example .env` (API) and `cp apps/mobile/.env.example apps/mobile/.env` (`EXPO_PUBLIC_API_URL`). Both validate env with zod at startup (`apps/api/src/env.ts`, `apps/mobile/src/env.ts`).
 
 ## Structure
 
@@ -29,6 +29,9 @@ Local env: `cp .env.example .env`. The API validates env with zod at startup (`a
   - Integration tests use real Postgres: DB `gsc_test` (or `TEST_DATABASE_URL`) is dropped, migrated and seeded on every run; `test/helpers.ts` has `useTestApp`, `registerUser`, `importFixture`. S3 is `MemoryStorage` in tests.
   - Errors: throw `HttpError(status, code, russianMessage)`; zod errors → 400, `FitParseError` → 422.
 - `apps/mobile`: Expo SDK 58, expo-router, dev client (no Expo Go). Routes live only in `src/app/`; screen bodies go in `src/screens/`, components in `src/components/`. Tests (Jest + RNTL) sit next to their files, never in `src/app/`.
+  - Styles use only tokens from `src/theme` (no raw colors/sizes in screens). API calls go through `src/lib/api` (zod-parsed, `ApiError` with a Russian message); server state via TanStack Query (`queryKeys` in `src/lib/query-client.ts`).
+  - Local SQLite cache: `src/lib/db` (drizzle schema + hand-written migrations in `migrations.ts`; add a new entry for every schema change).
+  - RNTL 14: `render` and `fireEvent` are async, so `await` them. Screen tests use `renderScreens` from `src/test/render.tsx`.
 - `packages/shared`: types, zod schemas, exercise/muscle catalog, analytics formulas.
 - `packages/fit-parser`: FIT → `ParsedWorkout` (`parseFit`). `normalize.ts` is pure (unit-tested on synthetic messages); errors are `FitParseError` with a `code`.
 - `fixtures/fit/`: real FIT files for tests.
