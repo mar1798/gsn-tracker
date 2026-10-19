@@ -31,6 +31,7 @@ Local env: `cp .env.example .env` (API) and `cp apps/mobile/.env.example apps/mo
 - `apps/mobile`: Expo SDK 58, expo-router, dev client (no Expo Go). Routes live only in `src/app/`; screen bodies go in `src/screens/`, components in `src/components/`. Tests (Jest + RNTL) sit next to their files, never in `src/app/`.
   - Styles use only tokens from `src/theme` (no raw colors/sizes in screens). API calls go through `src/lib/api` (zod-parsed, `ApiError` with a Russian message); server state via TanStack Query (`queryKeys` in `src/lib/query-client.ts`).
   - Local SQLite cache: `src/lib/db` (drizzle schema + hand-written migrations in `migrations.ts`; add a new entry for every schema change).
+  - Annotation edits go only through `enqueueEdit` (`src/lib/outbox.ts`, offline queue); screens read workouts via `useWorkoutDetail`, which applies pending edits. Never call `setsApi` from components.
   - RNTL 14: `render` and `fireEvent` are async, so `await` them. Screen tests use `renderScreens` from `src/test/render.tsx`.
 - `packages/shared`: types, zod schemas, exercise/muscle catalog, analytics formulas.
 - `packages/fit-parser`: FIT → `ParsedWorkout` (`parseFit`). `normalize.ts` is pure (unit-tested on synthetic messages); errors are `FitParseError` with a `code`.
