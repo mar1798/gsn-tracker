@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import { requireAuth } from './auth/authenticate.js';
 import type { AppDeps } from './deps.js';
 import { errorHandler } from './http.js';
+import { analyticsRoutes } from './routes/analytics.js';
 import { authRoutes } from './routes/auth.js';
 import { exerciseRoutes } from './routes/exercises.js';
 import { importRoutes } from './routes/imports.js';
@@ -23,6 +24,7 @@ export function buildApp(deps: AppDeps) {
     await authed.register(workoutRoutes, deps);
     await authed.register(setRoutes, deps);
     await authed.register(exerciseRoutes, deps);
+    await authed.register(analyticsRoutes, deps);
   });
 
   return app;
