@@ -19,8 +19,12 @@ type RowProps = {
   onLongPress?: () => void;
 };
 
-/** A Garmin set: exercise (or a prompt), load, duration/rest and peak HR. */
-export function GarminSetRow({ set, ...row }: RowProps & { set: WorkoutSet }) {
+/** A Garmin set: exercise (or a prompt), load, duration/rest and peak HR with its zone. */
+export function GarminSetRow({
+  set,
+  zone = null,
+  ...row
+}: RowProps & { set: WorkoutSet; zone?: number | null }) {
   const e = set.effective;
   const load = formatSetLoad(e.weightKg, e.reps, useUnits());
   const fromWatch = e.repsSource === 'garmin';
@@ -38,6 +42,11 @@ export function GarminSetRow({ set, ...row }: RowProps & { set: WorkoutSet }) {
             <AppText variant="bodyStrong">{formatNumber(set.hr.peak)}</AppText>
           </View>
           <AppText variant="caption" color="textTertiary">
+            {zone ? (
+              <AppText variant="caption" color="heartRate" accessibilityLabel={`зона ${zone}`}>
+                З{zone} ·{' '}
+              </AppText>
+            ) : null}
             ср. {formatNumber(set.hr.avg)}
           </AppText>
         </View>

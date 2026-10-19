@@ -2,7 +2,7 @@ import type { Exercise, WorkoutDetail, WorkoutHrResponse } from '@gsc/shared';
 import { and, eq, sql } from 'drizzle-orm';
 
 import { getDb } from './client';
-import { cachedExercises, cachedWorkoutDetails } from './schema';
+import { cachedExercises, cachedWorkoutDetails, cachedWorkouts } from './schema';
 
 // Workout details (with HR) and the exercise catalog, so annotation works offline.
 
@@ -35,8 +35,13 @@ export function cacheWorkoutHr(userId: string, id: string, hr: WorkoutHrResponse
   getDb().update(cachedWorkoutDetails).set({ hr }).where(byUser(userId, id)).run();
 }
 
+/** A workout gone from the server: its detail and its feed entry. */
 export function removeCachedWorkout(userId: string, id: string) {
-  getDb().delete(cachedWorkoutDetails).where(byUser(userId, id)).run();
+  const db = getDb();
+  db.delete(cachedWorkoutDetails).where(byUser(userId, id)).run();
+  db.delete(cachedWorkouts)
+    .where(and(eq(cachedWorkouts.userId, userId), eq(cachedWorkouts.id, id)))
+    .run();
 }
 
 export function getCachedExercises(userId: string): Exercise[] | null {

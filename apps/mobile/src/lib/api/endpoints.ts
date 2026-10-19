@@ -62,6 +62,7 @@ export const workoutsApi = {
     api.request(`/workouts/${encodeURIComponent(id)}`, { schema: workoutDetailSchema }),
   hr: (id: string) =>
     api.request(`/workouts/${encodeURIComponent(id)}/hr`, { schema: workoutHrResponseSchema }),
+  remove: (id: string) => api.request(`/workouts/${encodeURIComponent(id)}`, { method: 'DELETE' }),
 };
 
 export const exercisesApi = {

@@ -1,16 +1,18 @@
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { Alert, type AlertButton } from 'react-native';
 
 import { ApiError } from '@/lib/api/client';
 import { analyticsApi, exercisesApi, workoutsApi } from '@/lib/api/endpoints';
-import { getCachedWorkout } from '@/lib/db/detail-cache';
-import { enqueueEdit, loadOutbox, resetOutbox } from '@/lib/outbox';
+import { getCachedWorkout, removeCachedWorkout } from '@/lib/db/detail-cache';
+import { enqueueEdit, loadOutbox, resetOutbox, useOutbox } from '@/lib/outbox';
+import { useSession } from '@/lib/session';
 import { BENCH, CATALOG, garminSet, WORKOUT_ID, workoutDetail } from '@/test/fixtures';
 import { Noop, renderScreens } from '@/test/render';
 
 import { WorkoutDetailScreen } from './workout-detail';
 
 jest.mock('@/lib/api/endpoints', () => ({
-  workoutsApi: { get: jest.fn(), hr: jest.fn() },
+  workoutsApi: { get: jest.fn(), hr: jest.fn(), remove: jest.fn() },
   exercisesApi: { list: jest.fn() },
   analyticsApi: { records: jest.fn() },
   // Edits stay queued: the screen must show them before the server confirms.
@@ -61,6 +63,7 @@ function renderDetail() {
 describe('WorkoutDetailScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useSession.setState({ status: 'signedOut', tokens: null, user: null });
     resetOutbox();
     loadOutbox('user-1');
     get.mockResolvedValue(workoutDetail(sets));
@@ -174,5 +177,45 @@ describe('WorkoutDetailScreen', () => {
       await screen.findByText('Нет связи с сервером — показана сохранённая копия'),
     ).toBeTruthy();
     expect(screen.getByLabelText('Подход 1')).toBeTruthy();
+  });
+
+  it('shows the zone of each set peak by the max HR from settings', async () => {
+    useSession.setState({
+      status: 'signedIn',
+      tokens: { accessToken: 'a', refreshToken: 'r' },
+      user: {
+        id: 'user-1',
+        email: null,
+        name: null,
+        settings: { units: 'kg', hrMax: 190, hrZones: null, bodyWeightKg: null },
+        createdAt: '2026-10-19T10:00:00.000Z',
+      },
+    });
+    await renderDetail();
+    // Peak 150 with zones up to 114 / 133 / 152 / 171 / 190 bpm.
+    expect(await screen.findAllByLabelText('зона 3')).toHaveLength(sets.length);
+  });
+
+  it('deletes the workout with its unsent edits after confirmation', async () => {
+    const alert = jest.spyOn(Alert, 'alert');
+    jest.mocked(workoutsApi.remove).mockResolvedValue(undefined);
+    await renderDetail();
+    await screen.findByText('Подходы · 4');
+    enqueueEdit({
+      kind: 'annotation.bulk',
+      workoutId: WORKOUT_ID,
+      setIds: [sets[0]!.id],
+      patch: { exerciseId: BENCH.id },
+    });
+    expect(useOutbox.getState().queue).toHaveLength(1);
+
+    await fireEvent.press(screen.getByText('Удалить тренировку'));
+    expect(workoutsApi.remove).not.toHaveBeenCalled();
+    const buttons = alert.mock.calls[0]![2] as AlertButton[];
+    await act(async () => buttons.find((b) => b.style === 'destructive')!.onPress!());
+
+    expect(workoutsApi.remove).toHaveBeenCalledWith(WORKOUT_ID);
+    await waitFor(() => expect(useOutbox.getState().queue).toEqual([]));
+    expect(removeCachedWorkout).toHaveBeenCalledWith('', WORKOUT_ID);
   });
 });

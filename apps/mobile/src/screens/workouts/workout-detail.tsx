@@ -1,7 +1,21 @@
-import { setIdsBetween, type ManualSet, type WorkoutDetail, type WorkoutSet } from '@gsc/shared';
+import {
+  hrZoneOf,
+  resolveHrZones,
+  setIdsBetween,
+  type ManualSet,
+  type WorkoutDetail,
+  type WorkoutSet,
+} from '@gsc/shared';
 import { Stack, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View, type ScrollViewInstance } from 'react-native';
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+  type ScrollViewInstance,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/app-text';
@@ -13,11 +27,13 @@ import { HrChart } from '@/components/hr-chart';
 import { MarkupProgress } from '@/components/markup-progress';
 import { Metric } from '@/components/metric';
 import { Skeleton } from '@/components/skeleton';
+import { useDeleteWorkout } from '@/hooks/use-delete-workout';
 import { useExercises } from '@/hooks/use-exercises';
 import { useWorkoutDetail, useWorkoutHr } from '@/hooks/use-workout-detail';
 import { formatDuration, formatNumber, formatWorkoutDate } from '@/lib/format';
-import { hapticSelection } from '@/lib/haptics';
+import { hapticSelection, hapticSuccess, hapticWarning } from '@/lib/haptics';
 import { dismissOutboxFailure, useOutbox } from '@/lib/outbox';
+import { useSession } from '@/lib/session';
 import { colors, radii, spacing } from '@/theme';
 
 import { GarminSetRow, ManualSetRow } from './set-row';
@@ -52,6 +68,8 @@ export function WorkoutDetailScreen({ id }: { id: string }) {
   const hr = useWorkoutHr(id);
   const { byId } = useExercises();
   const failure = useOutbox((s) => (s.failure?.workoutId === id ? s.failure : null));
+  const settings = useSession((s) => s.user?.settings);
+  const remove = useDeleteWorkout();
   const workout = query.workout;
 
   const [selection, setSelection] = useState<Selection | null>(null);
@@ -128,6 +146,33 @@ export function WorkoutDetailScreen({ id }: { id: string }) {
 
   const selecting = selection !== null;
   const selectedIds = selection?.ids ?? [];
+
+  const zones = resolveHrZones(
+    settings ?? { hrZones: null, hrMax: null },
+    workout.hrZones?.highBoundaries ?? null,
+  )?.bounds;
+
+  const confirmDelete = () => {
+    void hapticWarning();
+    Alert.alert(
+      'Удалить тренировку?',
+      'Тренировка, разметка подходов и FIT-файл будут удалены. Файл можно импортировать снова.',
+      [
+        { text: 'Отмена', style: 'cancel' },
+        {
+          text: 'Удалить',
+          style: 'destructive',
+          onPress: () =>
+            remove.mutate(id, {
+              onSuccess: () => {
+                void hapticSuccess();
+                router.back();
+              },
+            }),
+        },
+      ],
+    );
+  };
 
   return (
     <View style={styles.screen}>
@@ -247,6 +292,7 @@ export function WorkoutDetailScreen({ id }: { id: string }) {
                 <GarminSetRow
                   set={row.set}
                   exerciseName={nameOf(row.set.effective.exerciseId)}
+                  zone={zones ? hrZoneOf(row.set.hr.peak, zones) : null}
                   selected={selecting ? selectedIds.includes(row.set.id) : undefined}
                   highlighted={highlighted === row.set.id}
                   onPress={() => (selecting ? toggle(row.set.id) : openAnnotation([row.set.id]))}
@@ -279,6 +325,26 @@ export function WorkoutDetailScreen({ id }: { id: string }) {
         ) : null}
 
         {!selecting ? <WorkoutSummary workout={workout} hr={hr.data ?? null} byId={byId} /> : null}
+
+        {!selecting ? (
+          <View style={styles.danger}>
+            {remove.error ? (
+              <Banner
+                tone="danger"
+                icon="exclamationmark.triangle"
+                message={remove.error.message}
+              />
+            ) : null}
+            <Button
+              title="Удалить тренировку"
+              icon="trash"
+              variant="danger"
+              block
+              loading={remove.isPending}
+              onPress={confirmDelete}
+            />
+          </View>
+        ) : null}
       </ScrollView>
 
       {selecting ? (
@@ -325,4 +391,5 @@ const styles = StyleSheet.create({
     borderTopRightRadius: radii.lg,
   },
   barMain: { flex: 1 },
+  danger: { gap: spacing.sm, marginTop: spacing.lg },
 });

@@ -85,6 +85,16 @@ export function enqueueEdit(edit: WorkoutEdit) {
 
 export const dismissOutboxFailure = () => useOutbox.setState({ failure: null });
 
+/** The workout was deleted: its unsent edits have nothing left to change. */
+export function discardWorkoutEdits(workoutId: string) {
+  const dropped = useOutbox.getState().queue.filter((q) => q.edit.workoutId === workoutId);
+  for (const q of dropped) removeQueuedEdit(q.id);
+  useOutbox.setState((s) => ({
+    queue: s.queue.filter((q) => q.edit.workoutId !== workoutId),
+    failure: s.failure?.workoutId === workoutId ? null : s.failure,
+  }));
+}
+
 async function send(edit: WorkoutEdit): Promise<EditResult> {
   switch (edit.kind) {
     case 'annotation.put':
