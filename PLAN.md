@@ -237,7 +237,7 @@ GET    /export/csv
 **Фаза 0. Каркас.** ✅ _(2026-10-19)_ Монорепозиторий, TS-конфиги, линтеры, docker-compose (postgres + minio), пустые `apps/api` и `apps/mobile` (Expo dev client запускается на симуляторе iOS), CI, `CLAUDE.md` с командами и правилами.
 *Готово, когда:* `pnpm dev` поднимает API и Metro, приложение открывается в симуляторе.
 
-**Фаза 1. FIT-парсер.** Скрипт `fit:dump`, `packages/fit-parser`, тесты на фикстурах. Первая фикстура уже лежит в `fixtures/fit/` вместе с `.expected.json` (21 подход, 326 повторов, подозрительные подходы 12 и 13, все веса 0). Snapshot-тест обязан с ней совпасть. Если нужны ещё фикстуры (другие часы, тренировка без кнопки круга, структурированная тренировка), попроси меня.
+**Фаза 1. FIT-парсер.** ✅ _(2026-10-19)_ Скрипт `fit:dump`, `packages/fit-parser`, тесты на фикстурах. Первая фикстура уже лежит в `fixtures/fit/` вместе с `.expected.json` (21 подход, 326 повторов, подозрительные подходы 12 и 13, все веса 0). Snapshot-тест обязан с ней совпасть. Если нужны ещё фикстуры (другие часы, тренировка без кнопки круга, структурированная тренировка), попроси меня.
 *Готово, когда:* для реального файла выводится таблица подходов с повторами, длительностью, отдыхом и пульсом, совпадающая с тем, что показывает Garmin Connect.
 
 **Фаза 2. Бэкенд-ядро.** Схема БД и миграции, seed справочника, auth, импорт FIT (загрузка в S3, парсинг, сохранение, дедупликация), CRUD тренировок, разметка подходов, view `effective_sets`. Интеграционные тесты API.
@@ -282,3 +282,15 @@ GET    /export/csv
   - API в docker-compose вынесен в профиль `full`. Для разработки используется `pnpm dev` на хосте.
   - `packages/*` экспортируют TS-исходники без сборки (tsx и Metro). Продакшен-сборка — в фазе 9.
   - ESLint 9 flat config (корневой для Node/TS, `eslint-config-expo` для mobile). Vitest 5 для пакетов и API, jest-expo + RNTL для mobile.
+- **2026-10-19, фаза 1 (FIT-парсер).**
+  - `@garmin/fitsdk` 21.218 (официальный SDK, со своими типами). Опции декодера вынесены в `DECODER_OPTIONS` (`src/decode.ts`). Перед декодированием проверяются `isFIT` и CRC, иначе `FitParseError` с кодом `not_fit` / `corrupted`. Нет сессии → `no_session`, спорт не `training/strengthTraining` → `not_strength`.
+  - `parseFit(bytes) = normalizeWorkout(decodeFit(bytes).messages)`. `normalizeWorkout` — чистая функция, синтетические краевые случаи тестируются на ней, без сборки FIT-файлов.
+  - **`garmin_activity_id` в FIT-файле нет** (`file_id` содержит только serial и `timeCreated`). Парсер возвращает `null`: для `manual_fit` дедупликация идёт по SHA-256, id появится с API-адаптером в фазе 8.
+  - `set.timestamp` у всех сообщений одинаковый, поэтому порядок и окна строятся по `startTime`. Сумма `duration` active-подходов в точности равна `session.activeTime`.
+  - `garminHints` — массив объектов `{ category, subtype, exerciseName, label }`, а не `string[]`: нужно сохранить subtype (у подхода 21 `lateralRaise` и `lateralRaise/25 = seatedRearLateralRaise`). `unknown` и точные дубли отброшены, порядок как у часов. Имя упражнения берётся из `Profile.types[<category>ExerciseName]`.
+  - `restAfterSec` = сумма rest-сообщений до следующего active-подхода, `null`, если отдыха нет.
+  - **Калории по подходам**: сессионные калории распределяются пропорционально `duration × avg_hr` по **всем** сегментам (active + rest), подходу достаётся его доля. Иначе весь расход за 1:11 приписался бы 19 минутам под нагрузкой. Сегмент без пульса получает средний пульс сессии.
+  - Пульсовые зоны берутся из `time_in_zone` с `referenceMesg = 'session'` как есть (`highBoundaries`, `secondsInZone`), без пересчёта. Сообщения на отдельные set пока не используются.
+  - `utcOffsetSec` = `deviceSettings.timeOffset[0]`, fallback — `activity.localTimestamp − timestamp`.
+  - Нули Garmin (вес, пульс, вес и рост в профиле) → `null`.
+  - Скрипты: `pnpm fit:dump <file> [mesgKey]` (все сообщения и поля) и `pnpm fit:sets <file>` (таблица подходов). Таблица фикстуры зафиксирована snapshot-тестом.

@@ -14,6 +14,8 @@ pnpm dev                   # API (tsx watch, :3000) + Metro (dev client)
 pnpm --filter @gsc/mobile ios   # build and install the dev client on the iOS simulator (expo run:ios)
 pnpm lint && pnpm typecheck && pnpm test   # must be green at the end of every phase
 pnpm format                # prettier
+pnpm fit:dump <file> [mesgKey]   # every FIT message/field as decoded by @garmin/fitsdk
+pnpm fit:sets <file>       # parsed set table (compare with Garmin Connect)
 ```
 
 Local env: `cp .env.example .env`. The API validates env with zod at startup (`apps/api/src/env.ts`).
@@ -23,7 +25,7 @@ Local env: `cp .env.example .env`. The API validates env with zod at startup (`a
 - `apps/api`: Fastify + TypeScript, Vitest. Entry point `src/server.ts`, app factory `src/app.ts` (tests use `app.inject`).
 - `apps/mobile`: Expo SDK 58, expo-router, dev client (no Expo Go). Routes live only in `src/app/`; screen bodies go in `src/screens/`, components in `src/components/`. Tests (Jest + RNTL) sit next to their files, never in `src/app/`.
 - `packages/shared`: types, zod schemas, exercise/muscle catalog, analytics formulas.
-- `packages/fit-parser`: FIT → `ParsedWorkout`.
+- `packages/fit-parser`: FIT → `ParsedWorkout` (`parseFit`). `normalize.ts` is pure (unit-tested on synthetic messages); errors are `FitParseError` with a `code`.
 - `fixtures/fit/`: real FIT files for tests.
 - Packages export TS source directly (`exports: ./src/index.ts`) with no build step; the API runs through tsx and mobile through Metro.
 
