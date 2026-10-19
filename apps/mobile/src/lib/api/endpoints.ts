@@ -1,12 +1,21 @@
 import {
   authResponseSchema,
+  exerciseListResponseSchema,
   importFitResponseSchema,
+  manualSetSchema,
   userSchema,
   workoutDetailSchema,
+  workoutHrResponseSchema,
   workoutListResponseSchema,
+  workoutSetSchema,
+  type AnnotationInput,
+  type BulkAnnotationRequest,
   type LoginRequest,
+  type ManualSetInput,
+  type ManualSetPatch,
   type RegisterRequest,
 } from '@gsc/shared';
+import { z } from 'zod';
 
 import { api } from './index';
 
@@ -33,6 +42,43 @@ export const workoutsApi = {
     api.request('/workouts', { query: { cursor }, schema: workoutListResponseSchema }),
   get: (id: string) =>
     api.request(`/workouts/${encodeURIComponent(id)}`, { schema: workoutDetailSchema }),
+  hr: (id: string) =>
+    api.request(`/workouts/${encodeURIComponent(id)}/hr`, { schema: workoutHrResponseSchema }),
+};
+
+export const exercisesApi = {
+  list: () => api.request('/exercises', { schema: exerciseListResponseSchema }),
+};
+
+const bulkAnnotationResponseSchema = z.object({ items: z.array(workoutSetSchema) });
+
+export const setsApi = {
+  putAnnotation: (setId: string, body: AnnotationInput) =>
+    api.request(`/sets/${encodeURIComponent(setId)}/annotation`, {
+      method: 'PUT',
+      body,
+      schema: workoutSetSchema,
+    }),
+  bulkAnnotate: (body: BulkAnnotationRequest) =>
+    api.request('/sets/annotations/bulk', {
+      method: 'POST',
+      body,
+      schema: bulkAnnotationResponseSchema,
+    }),
+  createManual: (workoutId: string, body: ManualSetInput) =>
+    api.request(`/workouts/${encodeURIComponent(workoutId)}/manual-sets`, {
+      method: 'POST',
+      body,
+      schema: manualSetSchema,
+    }),
+  updateManual: (id: string, body: ManualSetPatch) =>
+    api.request(`/manual-sets/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body,
+      schema: manualSetSchema,
+    }),
+  deleteManual: (id: string) =>
+    api.request(`/manual-sets/${encodeURIComponent(id)}`, { method: 'DELETE' }),
 };
 
 export type FitFile = { uri: string; name: string; mimeType?: string | null };

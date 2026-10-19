@@ -1,3 +1,4 @@
+import type { WorkoutDetail } from '@gsc/shared';
 import { focusManager, QueryClient } from '@tanstack/react-query';
 import { AppState } from 'react-native';
 
@@ -25,4 +26,13 @@ export const queryKeys = {
   workouts: ['workouts'] as const,
   workoutFeed: (userId: string) => ['workouts', 'feed', userId] as const,
   workout: (id: string) => ['workouts', 'detail', id] as const,
+  workoutHr: (id: string) => ['workouts', 'hr', id] as const,
+  exercises: ['exercises'] as const,
+};
+
+/** Cached data of `queryKeys.workout`: the server state, before pending edits are applied. */
+export type WorkoutDetailData = {
+  detail: WorkoutDetail;
+  /** Served from the local cache because the server is unreachable. */
+  fromCache?: boolean;
 };

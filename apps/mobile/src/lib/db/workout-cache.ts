@@ -2,7 +2,13 @@ import type { WorkoutSummary } from '@gsc/shared';
 import { desc, eq, sql } from 'drizzle-orm';
 
 import { getDb } from './client';
-import { cachedWorkouts } from './schema';
+import {
+  cachedExercises,
+  cachedWorkoutDetails,
+  cachedWorkouts,
+  pendingEdits,
+  recentExercises,
+} from './schema';
 
 function rows(userId: string, items: WorkoutSummary[]) {
   const cachedAt = new Date();
@@ -49,6 +55,18 @@ export function cacheWorkoutPage(userId: string, items: WorkoutSummary[], firstP
   });
 }
 
+/** Everything of the signed-out user, including edits that never reached the server. */
 export function clearLocalCache() {
-  getDb().delete(cachedWorkouts).run();
+  const db = getDb();
+  db.transaction((tx) => {
+    for (const table of [
+      cachedWorkouts,
+      cachedWorkoutDetails,
+      cachedExercises,
+      pendingEdits,
+      recentExercises,
+    ]) {
+      tx.delete(table).run();
+    }
+  });
 }

@@ -19,6 +19,31 @@ export const migrations: readonly string[] = [
      cached_at INTEGER NOT NULL
    );
    CREATE INDEX cached_workouts_user_started_idx ON cached_workouts (user_id, started_at);`,
+  `CREATE TABLE cached_workout_details (
+     id TEXT PRIMARY KEY NOT NULL,
+     user_id TEXT NOT NULL,
+     detail TEXT NOT NULL,
+     hr TEXT,
+     cached_at INTEGER NOT NULL
+   );
+   CREATE TABLE cached_exercises (
+     user_id TEXT PRIMARY KEY NOT NULL,
+     items TEXT NOT NULL,
+     cached_at INTEGER NOT NULL
+   );
+   CREATE TABLE pending_edits (
+     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+     user_id TEXT NOT NULL,
+     edit TEXT NOT NULL,
+     created_at INTEGER NOT NULL
+   );
+   CREATE INDEX pending_edits_user_idx ON pending_edits (user_id, id);
+   CREATE TABLE recent_exercises (
+     user_id TEXT NOT NULL,
+     exercise_id TEXT NOT NULL,
+     used_at INTEGER NOT NULL,
+     PRIMARY KEY (user_id, exercise_id)
+   );`,
 ];
 
 export function migrate(db: MigratableDb, list: readonly string[] = migrations) {

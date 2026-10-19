@@ -2,6 +2,7 @@ import type { LoginRequest, RegisterRequest } from '@gsc/shared';
 
 import { authApi } from '@/lib/api/endpoints';
 import { clearLocalCache } from '@/lib/db/workout-cache';
+import { loadOutbox, resetOutbox } from '@/lib/outbox';
 import { queryClient } from '@/lib/query-client';
 import { clearSession, saveSession, useSession } from '@/lib/session';
 
@@ -22,9 +23,14 @@ export async function signOut() {
 
 // Whatever ended the session (sign-out or a rejected refresh token),
 // drop the previous user's data from memory and from the local cache.
+// A new session (sign-in or restore at launch) picks up its queued offline edits.
 useSession.subscribe((state, prev) => {
   if (prev.status === 'signedIn' && state.status !== 'signedIn') {
+    resetOutbox();
     queryClient.clear();
     clearLocalCache();
+  }
+  if (state.status === 'signedIn' && prev.status !== 'signedIn') {
+    loadOutbox(state.user.id);
   }
 });
