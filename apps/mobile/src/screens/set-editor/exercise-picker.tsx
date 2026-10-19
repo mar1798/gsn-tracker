@@ -1,10 +1,10 @@
 import {
-  MUSCLE_GROUPS,
   searchExercises,
   type Exercise,
   type ExerciseShortcut,
   type ShortcutSource,
 } from '@gsc/shared';
+import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -13,9 +13,8 @@ import { Button } from '@/components/button';
 import { Tag } from '@/components/chip';
 import { Icon } from '@/components/icon';
 import { TextField } from '@/components/text-field';
+import { muscleName } from '@/lib/exercise-labels';
 import { colors, hitSize, radii, spacing } from '@/theme';
-
-const MUSCLE_NAMES = new Map<string, string>(MUSCLE_GROUPS.map((m) => [m.slug, m.nameRu]));
 
 const SOURCE_LABELS: Record<ShortcutSource, string> = {
   garmin: 'подсказка часов',
@@ -24,9 +23,7 @@ const SOURCE_LABELS: Record<ShortcutSource, string> = {
 };
 
 const primaryMuscles = (exercise: Exercise) =>
-  exercise.muscles
-    .filter((m) => m.role === 'primary')
-    .map((m) => MUSCLE_NAMES.get(m.muscle) ?? m.muscle);
+  exercise.muscles.filter((m) => m.role === 'primary').map((m) => muscleName(m.muscle));
 
 /**
  * Exercise choice: the chosen one as a card, or quick picks (Garmin suggestions, this workout,
@@ -43,6 +40,7 @@ export function ExercisePicker({
 }: {
   value: string | null;
   onChange: (exerciseId: string | null) => void;
+  /** Active exercises (deleted custom ones are left out). */
   exercises: readonly Exercise[];
   byId: ReadonlyMap<string, Exercise>;
   shortcuts: readonly ExerciseShortcut[];
@@ -51,6 +49,7 @@ export function ExercisePicker({
   /** Bulk mode: "Не менять" keeps each set's exercise. */
   allowClear?: boolean;
 }) {
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [browsing, setBrowsing] = useState(false);
   const results = useMemo(() => searchExercises(exercises, query), [exercises, query]);
@@ -113,7 +112,7 @@ export function ExercisePicker({
           </AppText>
           {shortcuts.map(({ exerciseId, source }) => {
             const exercise = byId.get(exerciseId);
-            return exercise ? (
+            return exercise && !exercise.isArchived ? (
               <ExerciseOption
                 key={exerciseId}
                 exercise={exercise}
@@ -131,9 +130,21 @@ export function ExercisePicker({
           {query.trim() ? `Найдено: ${results.length}` : 'Все упражнения'}
         </AppText>
         {results.length === 0 ? (
-          <AppText color="textTertiary">
-            Ничего не найдено. Попробуйте другое слово — например, «жим» или «тяга».
-          </AppText>
+          <>
+            <AppText color="textTertiary">
+              Ничего не найдено. Попробуйте другое слово — например, «жим» или «тяга» — или создайте
+              своё упражнение.
+            </AppText>
+            <Button
+              title={`Создать «${query.trim()}»`}
+              icon="plus"
+              size="sm"
+              variant="secondary"
+              onPress={() =>
+                router.push({ pathname: '/exercise-form', params: { name: query.trim() } })
+              }
+            />
+          </>
         ) : (
           results.map((exercise) => (
             <ExerciseOption

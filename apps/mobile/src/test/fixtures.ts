@@ -78,6 +78,7 @@ export function exercise(n: number, nameRu: string, overrides: Partial<Exercise>
     mechanics: 'compound',
     isBodyweight: false,
     isCustom: false,
+    isArchived: false,
     garminCategory: null,
     garminExerciseName: null,
     muscles: [{ muscle: 'chest', role: 'primary', coefficient: 1 }],

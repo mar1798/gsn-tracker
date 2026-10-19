@@ -10,12 +10,15 @@ import { useSession } from '@/lib/session';
 
 const EMPTY: Exercise[] = [];
 
-/** The whole catalog (built-in + custom), cached in SQLite for offline annotation. */
+/**
+ * The whole catalog (built-in + custom), cached in SQLite for offline annotation.
+ * `byId` includes deleted custom exercises (sets still show them), `active` does not.
+ */
 export function useExercises() {
   const userId = useSession((s) => s.user?.id ?? '');
   const query = useQuery({
     queryKey: queryKeys.exercises,
-    // The catalog changes only with an app release or a custom exercise (phase 5).
+    // The catalog changes only with an app release or a custom exercise (updated in place).
     staleTime: 60 * 60 * 1000,
     queryFn: async () => {
       try {
@@ -33,5 +36,6 @@ export function useExercises() {
 
   const exercises = query.data ?? EMPTY;
   const byId = useMemo(() => new Map(exercises.map((e) => [e.id, e])), [exercises]);
-  return { ...query, exercises, byId };
+  const active = useMemo(() => exercises.filter((e) => !e.isArchived), [exercises]);
+  return { ...query, exercises, active, byId };
 }

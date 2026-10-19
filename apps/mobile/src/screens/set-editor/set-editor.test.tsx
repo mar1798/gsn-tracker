@@ -47,7 +47,7 @@ const sets = [
 
 async function renderEditor(target: SetEditorTarget) {
   const router = await renderScreens(
-    { index: Noop, editor: () => <SetEditorScreen target={target} /> },
+    { index: Noop, editor: () => <SetEditorScreen target={target} />, 'exercise-form': Noop },
     { initialUrl: '/' },
   );
   // Open the editor on top of a screen, as the sheet is presented, so saving can go back.
@@ -61,6 +61,18 @@ describe('SetEditorScreen', () => {
     jest.clearAllMocks();
     jest.mocked(workoutsApi.get).mockResolvedValue(workoutDetail(sets));
     jest.mocked(exercisesApi.list).mockResolvedValue({ items: CATALOG });
+  });
+
+  it('offers to create a custom exercise that is not in the catalog', async () => {
+    const router = await renderEditor({
+      kind: 'garmin',
+      workoutId: WORKOUT_ID,
+      setIds: [sets[2]!.id],
+    });
+    await fireEvent.changeText(screen.getByLabelText('Упражнение'), 'Жим Арнольда');
+    await fireEvent.press(screen.getByText('Создать «Жим Арнольда»'));
+    expect(router.getPathname()).toBe('/exercise-form');
+    expect(router.getSearchParams()).toEqual({ name: 'Жим Арнольда' });
   });
 
   it('suggests the watch guess without applying it and saves a confirmed set', async () => {

@@ -1,6 +1,7 @@
 import {
   authResponseSchema,
   exerciseListResponseSchema,
+  exerciseSchema,
   importFitResponseSchema,
   manualSetSchema,
   userSchema,
@@ -10,6 +11,8 @@ import {
   workoutSetSchema,
   type AnnotationInput,
   type BulkAnnotationRequest,
+  type CustomExerciseInput,
+  type CustomExercisePatch,
   type LoginRequest,
   type ManualSetInput,
   type ManualSetPatch,
@@ -48,6 +51,15 @@ export const workoutsApi = {
 
 export const exercisesApi = {
   list: () => api.request('/exercises', { schema: exerciseListResponseSchema }),
+  create: (body: CustomExerciseInput) =>
+    api.request('/exercises', { method: 'POST', body, schema: exerciseSchema }),
+  update: (id: string, body: CustomExercisePatch) =>
+    api.request(`/exercises/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body,
+      schema: exerciseSchema,
+    }),
+  remove: (id: string) => api.request(`/exercises/${encodeURIComponent(id)}`, { method: 'DELETE' }),
 };
 
 const bulkAnnotationResponseSchema = z.object({ items: z.array(workoutSetSchema) });

@@ -126,7 +126,7 @@ function SetEditorForm({
 }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { exercises, byId } = useExercises();
+  const { active, byId } = useExercises();
   const recent = useOutbox((s) => s.recentExerciseIds);
 
   const single = target.kind === 'garmin' && sets.length === 1 ? sets[0]! : null;
@@ -291,7 +291,7 @@ function SetEditorForm({
         <ExercisePicker
           value={exerciseId}
           onChange={pickExercise}
-          exercises={exercises}
+          exercises={active}
           byId={byId}
           shortcuts={shortcuts}
           garminGuess={garminGuess}
