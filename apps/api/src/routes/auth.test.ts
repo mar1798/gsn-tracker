@@ -87,6 +87,22 @@ describe('email auth', () => {
     expect(me.statusCode).toBe(200);
   });
 
+  it('logout revokes the refresh token', async () => {
+    const { refreshToken } = await registerUser(app);
+    const logout = () =>
+      app.inject({ method: 'POST', url: '/auth/logout', payload: { refreshToken } });
+    expect((await logout()).statusCode).toBe(204);
+    // Idempotent.
+    expect((await logout()).statusCode).toBe(204);
+
+    const refresh = await app.inject({
+      method: 'POST',
+      url: '/auth/refresh',
+      payload: { refreshToken },
+    });
+    expect(refresh.statusCode).toBe(401);
+  });
+
   it('protects routes with the access token', async () => {
     expect((await app.inject({ method: 'GET', url: '/me' })).statusCode).toBe(401);
     const bad = await app.inject({

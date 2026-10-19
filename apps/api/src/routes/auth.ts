@@ -78,6 +78,15 @@ export async function authRoutes(app: FastifyInstance, { db, config, verifyApple
     return issueTokens(used.userId);
   });
 
+  /** Revokes the refresh token. Idempotent: an unknown token is not an error. */
+  app.post('/auth/logout', async (request, reply) => {
+    const { refreshToken } = parse(refreshRequestSchema, request.body);
+    await db
+      .delete(refreshTokens)
+      .where(eq(refreshTokens.tokenHash, hashRefreshToken(refreshToken)));
+    return reply.status(204).send();
+  });
+
   app.post('/auth/apple', async (request) => {
     if (!verifyAppleToken) {
       throw new HttpError(501, 'apple_not_configured', 'Вход через Apple пока недоступен');
