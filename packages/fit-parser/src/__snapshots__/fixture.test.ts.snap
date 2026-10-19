@@ -1,0 +1,26 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`real fixture 2026-10-17_strength_epix2pro > set table snapshot 1`] = `
+" #      time    dur   rest  reps  avg  max  min  peak  kcal  hints                                 flag
+ 1  09:06:21   80.0   95.9    50  143  163  105   163  12.9  row, curl
+ 2  09:09:17   74.6   99.3    50  132  154  111   154  11.1  row, curl
+ 3  09:12:10   73.9  247.4    50  130  149  110   149  10.8  row, curl
+ 4  09:17:32   36.0  162.3    10  126  131  118   131   5.1  curl, benchPress
+ 5  09:20:50   45.8  147.9    10  114  118  107   138   5.9  curl, benchPress
+ 6  09:24:04   75.9  156.2    10  126  141  113   150  10.8  curl, benchPress
+ 7  09:27:56   44.7  226.4    10  122  127  118   140   6.2  barbellDeadlift, curl
+ 8  09:32:27   57.3  154.9    10  144  154  133   164   9.3  curl, benchPress
+ 9  09:35:59   63.5  165.8    10  139  151  128   165    10  curl, benchPress
+10  09:39:49   65.1  170.8    10  143  149  135   169  10.5  curl, benchPress
+11  09:43:44   56.7  267.4    10  151  162  133   167   9.7  curl, benchPress
+12  09:49:09    1.8  218.1    10  161  162  160   162   0.3  curl, benchPress                      too_short
+13  09:52:48    1.6  156.2    10  156  156  156   159   0.3  squat, curl                           too_short
+14  09:55:26   41.9  183.6    10  139  150  130   166   6.6  barbellDeadlift, curl
+15  09:59:12  140.8   65.2    10  146  163  133   163  23.2  curl, benchPress
+16  10:02:38   85.6  133.2    10  146  151  139   151  14.1  sitUp, crunch
+17  10:06:16   59.7  123.4     6  142  155  123   155   9.6  curl, benchPress
+18  10:09:20   55.3  125.2    10  142  152  125   152   8.9  curl, benchPress
+19  10:12:20   22.4  123.8    10  142  146  140   154   3.6  curl, benchPress
+20  10:14:46   24.9  120.7    10  131  134  129   146   3.7  row, curl
+21  10:17:12   27.1   17.9    10  131  136  127   139     4  lateralRaise, seatedRearLateralRaise"
+`;

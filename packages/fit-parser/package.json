@@ -7,10 +7,16 @@
     ".": "./src/index.ts"
   },
   "scripts": {
+    "fit:dump": "tsx scripts/fit-dump.ts",
+    "fit:sets": "tsx scripts/fit-sets.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run"
   },
   "dependencies": {
+    "@garmin/fitsdk": "^21.218.0",
     "@gsc/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
   }
 }

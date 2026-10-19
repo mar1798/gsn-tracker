@@ -13,7 +13,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:up": "docker compose up -d postgres s3 s3-init",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "fit:dump": "pnpm --filter @gsc/fit-parser fit:dump",
+    "fit:sets": "pnpm --filter @gsc/fit-parser fit:sets"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",
