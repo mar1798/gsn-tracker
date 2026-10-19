@@ -1,24 +1,32 @@
 import { z } from 'zod';
+import { isAscending } from '../settings/hr-zones.js';
 import { isoDateTime } from './common.js';
 
 export const UNITS = ['kg', 'lb'] as const;
 
+const hrMax = z.number().int().min(100).max(250);
+/** Upper bounds (bpm) of HR zones 1..5, ascending. */
+const hrZones = z
+  .array(z.number().int().min(40).max(250))
+  .length(5)
+  .refine(isAscending, 'Границы зон должны возрастать');
+/** Overrides `user_profile.weight` from FIT for bodyweight exercises. */
+const bodyWeightKg = z.number().min(20).max(400);
+
 export const userSettingsSchema = z.object({
   units: z.enum(UNITS).default('kg'),
-  hrMax: z.number().int().min(100).max(250).nullable().default(null),
-  /** Upper bounds (bpm) of HR zones 1..5, ascending. */
-  hrZones: z.array(z.number().int().min(40).max(250)).length(5).nullable().default(null),
-  /** Overrides `user_profile.weight` from FIT for bodyweight exercises. */
-  bodyWeightKg: z.number().min(20).max(400).nullable().default(null),
+  hrMax: hrMax.nullable().default(null),
+  hrZones: hrZones.nullable().default(null),
+  bodyWeightKg: bodyWeightKg.nullable().default(null),
 });
 export type UserSettings = z.infer<typeof userSettingsSchema>;
 
 export const userSettingsPatchSchema = z
   .object({
     units: z.enum(UNITS),
-    hrMax: z.number().int().min(100).max(250).nullable(),
-    hrZones: z.array(z.number().int().min(40).max(250)).length(5).nullable(),
-    bodyWeightKg: z.number().min(20).max(400).nullable(),
+    hrMax: hrMax.nullable(),
+    hrZones: hrZones.nullable(),
+    bodyWeightKg: bodyWeightKg.nullable(),
   })
   .partial()
   .strict();
