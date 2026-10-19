@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { muscleIntensity, muscleLoads } from './muscles.js';
+import { muscleIntensity, muscleLoads, sessionMuscleIntensity } from './muscles.js';
 import { EXERCISES, PULL_UP, set } from './test-data.js';
 
 describe('muscleLoads', () => {
@@ -46,5 +46,13 @@ describe('muscleIntensity', () => {
     expect(muscleIntensity(20, 30)).toBeCloseTo((20 * 7) / 30 / 10, 6);
     expect(muscleIntensity(30, 7)).toBe(1);
     expect(muscleIntensity(0, 7)).toBe(0);
+  });
+});
+
+describe('sessionMuscleIntensity', () => {
+  it('relates sets of one workout to the session target', () => {
+    expect(sessionMuscleIntensity(3)).toBe(0.5);
+    expect(sessionMuscleIntensity(9)).toBe(1);
+    expect(sessionMuscleIntensity(0)).toBe(0);
   });
 });

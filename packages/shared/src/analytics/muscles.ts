@@ -41,3 +41,10 @@ export function muscleIntensity(sets: number, periodDays: number): number {
   if (sets <= 0 || periodDays <= 0) return 0;
   return Math.min(1, (sets * 7) / periodDays / WEEKLY_SETS_TARGET);
 }
+
+/** Working sets for a muscle in one workout that light it up fully on the summary map. */
+export const SESSION_SETS_TARGET = 6;
+
+/** Heat map intensity 0..1 of a single workout. */
+export const sessionMuscleIntensity = (sets: number) =>
+  sets <= 0 ? 0 : Math.min(1, sets / SESSION_SETS_TARGET);
