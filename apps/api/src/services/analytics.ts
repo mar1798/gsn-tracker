@@ -2,15 +2,14 @@ import {
   EMPTY_RECORDS,
   exerciseRecords,
   exerciseSessions,
-  hrRecovery,
   inPeriod,
-  isHrSet,
   localDate,
   muscleLoads,
   previousPeriod,
   userSettingsSchema,
   weekStart,
   weekStarts,
+  workoutRecoveries,
   workoutTotals,
   type AnalyticsExercise,
   type AnalyticsMuscles,
@@ -103,18 +102,6 @@ export async function loadAnalyticsWorkouts(
   return rows.map((w) => {
     const sets = setsByWorkout.get(w.id) ?? [];
     const hr = hrByWorkout.get(w.id);
-    const recoveries: number[] = [];
-    if (hr) {
-      for (const s of sets) {
-        if (!s.startedAt || s.durationSec === null || !isHrSet(s)) continue;
-        const recovery = hrRecovery(hr, {
-          startSec: (s.startedAt.getTime() - w.startedAt.getTime()) / 1000,
-          durationSec: s.durationSec,
-          restAfterSec: s.restAfterSec,
-        });
-        if (recovery !== null) recoveries.push(recovery);
-      }
-    }
     return {
       id: w.id,
       startedAt: w.startedAt.toISOString(),
@@ -133,7 +120,13 @@ export async function loadAnalyticsWorkouts(
         avgHr: s.avgHr,
         hrPeak: s.hrPeak,
       })),
-      hrRecoveriesBpm: recoveries,
+      hrRecoveriesBpm: hr
+        ? workoutRecoveries(
+            hr,
+            w.startedAt,
+            sets.flatMap((s) => (s.startedAt ? [{ ...s, startedAt: s.startedAt }] : [])),
+          )
+        : [],
     };
   });
 }

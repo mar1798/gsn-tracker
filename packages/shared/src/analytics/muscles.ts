@@ -32,3 +32,12 @@ export function muscleLoads(
   }
   return into;
 }
+
+/** Weekly working sets that light a muscle up fully on the heat map (a common hypertrophy target). */
+export const WEEKLY_SETS_TARGET = 10;
+
+/** Heat map intensity 0..1: sets per week relative to the target. */
+export function muscleIntensity(sets: number, periodDays: number): number {
+  if (sets <= 0 || periodDays <= 0) return 0;
+  return Math.min(1, (sets * 7) / periodDays / WEEKLY_SETS_TARGET);
+}

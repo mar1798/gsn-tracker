@@ -67,3 +67,32 @@ export function sumZones(zones: readonly (readonly number[] | null)[]): number[]
   for (const z of zones) z?.forEach((sec, i) => (total[i] = (total[i] ?? 0) + sec));
   return total;
 }
+
+/** A set as stored: absolute start time and whether the user dropped it from HR metrics. */
+export interface TimedSet {
+  startedAt: string | Date;
+  durationSec: number | null;
+  restAfterSec: number | null;
+  isWarmup: boolean;
+  isExcluded: boolean;
+}
+
+/** HR recovery of every working set of a workout where it can be measured. */
+export function workoutRecoveries(
+  hr: HrSeries,
+  workoutStartedAt: string | Date,
+  sets: readonly TimedSet[],
+): number[] {
+  const start = new Date(workoutStartedAt).getTime();
+  const result: number[] = [];
+  for (const s of sets) {
+    if (s.durationSec === null || s.isWarmup || s.isExcluded) continue;
+    const r = hrRecovery(hr, {
+      startSec: (new Date(s.startedAt).getTime() - start) / 1000,
+      durationSec: s.durationSec,
+      restAfterSec: s.restAfterSec,
+    });
+    if (r !== null) result.push(r);
+  }
+  return result;
+}

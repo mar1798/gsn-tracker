@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { muscleLoads } from './muscles.js';
+import { muscleIntensity, muscleLoads } from './muscles.js';
 import { EXERCISES, PULL_UP, set } from './test-data.js';
 
 describe('muscleLoads', () => {
@@ -37,5 +37,14 @@ describe('muscleLoads', () => {
     const into = muscleLoads([set()], EXERCISES, null);
     muscleLoads([set()], EXERCISES, null, into);
     expect(into.get('chest')).toEqual({ sets: 2, volumeKg: 1200 });
+  });
+});
+
+describe('muscleIntensity', () => {
+  it('relates weekly sets to the target, capped at 1', () => {
+    expect(muscleIntensity(5, 7)).toBe(0.5);
+    expect(muscleIntensity(20, 30)).toBeCloseTo((20 * 7) / 30 / 10, 6);
+    expect(muscleIntensity(30, 7)).toBe(1);
+    expect(muscleIntensity(0, 7)).toBe(0);
   });
 });
