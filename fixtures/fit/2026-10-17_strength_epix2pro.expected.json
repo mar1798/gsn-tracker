@@ -1,0 +1,293 @@
+{
+  "source": "Garmin Connect Export Original, activity 24751450039",
+  "device": "epixGen2Pro47",
+  "sport": "training",
+  "subSport": "strengthTraining",
+  "utcOffsetSec": 21600,
+  "session": {
+    "startTime": "2026-10-17T03:06:21.000Z",
+    "totalTimerTimeSec": 4296.221,
+    "activeTimeSec": 1134.595,
+    "totalCalories": 668,
+    "avgHeartRate": 138,
+    "maxHeartRate": 170
+  },
+  "counts": {
+    "setMesgs": 42,
+    "activeSets": 21,
+    "restSets": 21,
+    "totalReps": 326,
+    "recordMesgsWithHr": 2107
+  },
+  "suspiciousShortSetIndexes": [
+    12,
+    13
+  ],
+  "allWeightsZero": true,
+  "activeSets": [
+    {
+      "n": 1,
+      "startTime": "2026-10-17T03:06:21.000Z",
+      "durationSec": 80.0,
+      "repetitions": 50,
+      "category": [
+        "row",
+        "unknown",
+        "curl"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 2,
+      "startTime": "2026-10-17T03:09:17.000Z",
+      "durationSec": 74.6,
+      "repetitions": 50,
+      "category": [
+        "row",
+        "unknown",
+        "curl"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 3,
+      "startTime": "2026-10-17T03:12:10.000Z",
+      "durationSec": 73.9,
+      "repetitions": 50,
+      "category": [
+        "row",
+        "unknown",
+        "curl"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 4,
+      "startTime": "2026-10-17T03:17:32.000Z",
+      "durationSec": 36.0,
+      "repetitions": 10,
+      "category": [
+        "unknown",
+        "curl",
+        "benchPress"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 5,
+      "startTime": "2026-10-17T03:20:50.000Z",
+      "durationSec": 45.8,
+      "repetitions": 10,
+      "category": [
+        "unknown",
+        "curl",
+        "benchPress"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 6,
+      "startTime": "2026-10-17T03:24:04.000Z",
+      "durationSec": 75.9,
+      "repetitions": 10,
+      "category": [
+        "unknown",
+        "curl",
+        "benchPress"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 7,
+      "startTime": "2026-10-17T03:27:56.000Z",
+      "durationSec": 44.7,
+      "repetitions": 10,
+      "category": [
+        "deadlift",
+        "unknown",
+        "curl"
+      ],
+      "categorySubtype": [
+        0,
+        null,
+        null
+      ]
+    },
+    {
+      "n": 8,
+      "startTime": "2026-10-17T03:32:27.000Z",
+      "durationSec": 57.3,
+      "repetitions": 10,
+      "category": [
+        "unknown",
+        "curl",
+        "benchPress"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 9,
+      "startTime": "2026-10-17T03:35:59.000Z",
+      "durationSec": 63.5,
+      "repetitions": 10,
+      "category": [
+        "unknown",
+        "curl",
+        "benchPress"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 10,
+      "startTime": "2026-10-17T03:39:49.000Z",
+      "durationSec": 65.1,
+      "repetitions": 10,
+      "category": [
+        "curl",
+        "unknown",
+        "benchPress"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 11,
+      "startTime": "2026-10-17T03:43:44.000Z",
+      "durationSec": 56.7,
+      "repetitions": 10,
+      "category": [
+        "curl",
+        "unknown",
+        "benchPress"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 12,
+      "startTime": "2026-10-17T03:49:09.000Z",
+      "durationSec": 1.8,
+      "repetitions": 10,
+      "category": [
+        "unknown",
+        "curl",
+        "benchPress"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 13,
+      "startTime": "2026-10-17T03:52:48.000Z",
+      "durationSec": 1.6,
+      "repetitions": 10,
+      "category": [
+        "unknown",
+        "squat",
+        "curl"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 14,
+      "startTime": "2026-10-17T03:55:26.000Z",
+      "durationSec": 41.9,
+      "repetitions": 10,
+      "category": [
+        "deadlift",
+        "unknown",
+        "curl"
+      ],
+      "categorySubtype": [
+        0,
+        null,
+        null
+      ]
+    },
+    {
+      "n": 15,
+      "startTime": "2026-10-17T03:59:12.000Z",
+      "durationSec": 140.8,
+      "repetitions": 10,
+      "category": [
+        "unknown",
+        "curl",
+        "benchPress"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 16,
+      "startTime": "2026-10-17T04:02:38.000Z",
+      "durationSec": 85.6,
+      "repetitions": 10,
+      "category": [
+        "sitUp",
+        "crunch",
+        "unknown"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 17,
+      "startTime": "2026-10-17T04:06:16.000Z",
+      "durationSec": 59.7,
+      "repetitions": 6,
+      "category": [
+        "unknown",
+        "curl",
+        "benchPress"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 18,
+      "startTime": "2026-10-17T04:09:20.000Z",
+      "durationSec": 55.3,
+      "repetitions": 10,
+      "category": [
+        "unknown",
+        "curl",
+        "benchPress"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 19,
+      "startTime": "2026-10-17T04:12:20.000Z",
+      "durationSec": 22.4,
+      "repetitions": 10,
+      "category": [
+        "unknown",
+        "curl",
+        "benchPress"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 20,
+      "startTime": "2026-10-17T04:14:46.000Z",
+      "durationSec": 24.9,
+      "repetitions": 10,
+      "category": [
+        "unknown",
+        "row",
+        "curl"
+      ],
+      "categorySubtype": null
+    },
+    {
+      "n": 21,
+      "startTime": "2026-10-17T04:17:12.000Z",
+      "durationSec": 27.1,
+      "repetitions": 10,
+      "category": [
+        "lateralRaise",
+        "lateralRaise",
+        "unknown"
+      ],
+      "categorySubtype": [
+        null,
+        25,
+        null
+      ]
+    }
+  ]
+}
