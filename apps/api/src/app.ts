@@ -5,6 +5,7 @@ import { errorHandler } from './http.js';
 import { analyticsRoutes } from './routes/analytics.js';
 import { authRoutes } from './routes/auth.js';
 import { exerciseRoutes } from './routes/exercises.js';
+import { exportRoutes } from './routes/export.js';
 import { importRoutes } from './routes/imports.js';
 import { meRoutes } from './routes/me.js';
 import { setRoutes } from './routes/sets.js';
@@ -25,6 +26,7 @@ export function buildApp(deps: AppDeps) {
     await authed.register(setRoutes, deps);
     await authed.register(exerciseRoutes, deps);
     await authed.register(analyticsRoutes, deps);
+    await authed.register(exportRoutes, deps);
   });
 
   return app;
