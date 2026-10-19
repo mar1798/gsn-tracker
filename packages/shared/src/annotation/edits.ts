@@ -126,7 +126,7 @@ export function applyWorkoutEdits(
         const ids = new Set(edit.setIds);
         sets = sets.map((s) => {
           if (!ids.has(s.id)) return s;
-          const { updatedAt: _, ...current } = s.annotation ?? { ...EMPTY_ANNOTATION, updatedAt };
+          const current: AnnotationValues = s.annotation ?? EMPTY_ANNOTATION;
           return withAnnotation(s, { ...current, ...edit.patch }, updatedAt);
         });
         break;
