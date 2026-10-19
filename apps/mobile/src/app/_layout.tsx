@@ -57,7 +57,8 @@ export default function RootLayout() {
             <Stack.Screen name="import" options={{ presentation: 'modal' }} />
           </Stack.Protected>
           <Stack.Protected guard={!signedIn}>
-            <Stack.Screen name="(auth)" />
+            <Stack.Screen name="sign-in" />
+            <Stack.Screen name="sign-up" options={{ animation: 'fade' }} />
           </Stack.Protected>
         </Stack>
       </ThemeProvider>
