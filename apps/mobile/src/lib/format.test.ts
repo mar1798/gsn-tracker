@@ -1,6 +1,12 @@
 import {
+  formatChange,
   formatDuration,
   formatNumber,
+  formatPercent,
+  formatRecord,
+  formatShortDate,
+  formatVolume,
+  localToday,
   formatWorkoutDate,
   formatSetLoad,
   formatSetNumbers,
@@ -67,5 +73,37 @@ describe('formatSetNumbers', () => {
     expect(formatSetNumbers([1, 2, 5])).toBe('1, 2, 5');
     expect(formatSetNumbers([3])).toBe('3');
     expect(formatSetNumbers([])).toBe('');
+  });
+});
+
+describe('analytics formatting', () => {
+  it('formats volume in kg or tonnes', () => {
+    expect(formatVolume(850.4)).toBe('850 кг');
+    expect(formatVolume(12_440)).toBe('12,4 т');
+    expect(formatVolume(0)).toBe('0 кг');
+    expect(formatVolume(null)).toBe('—');
+  });
+
+  it('formats shares and changes', () => {
+    expect(formatPercent(0.264)).toBe('26 %');
+    expect(formatPercent(null)).toBe('—');
+    expect(formatChange(112, 100)).toEqual({ text: '+12 %', direction: 'up' });
+    expect(formatChange(95, 100)).toEqual({ text: '−5 %', direction: 'down' });
+    expect(formatChange(100, 100)).toEqual({ text: '0 %', direction: 'flat' });
+    expect(formatChange(100, 0)).toBeNull();
+    expect(formatChange(null, 100)).toBeNull();
+  });
+
+  it('formats dates', () => {
+    expect(formatShortDate('2026-10-07')).toBe('7 окт');
+    expect(localToday(new Date(2026, 0, 5, 23, 30))).toBe('2026-01-05');
+  });
+});
+
+describe('formatRecord', () => {
+  it('shows the heaviest set with reps and volumes in kg or tonnes', () => {
+    expect(formatRecord('maxWeight', 80, 3)).toBe('80 кг × 3');
+    expect(formatRecord('maxE1rm', 101.333, null)).toBe('101,3 кг');
+    expect(formatRecord('maxWorkoutVolume', 1840, null)).toBe('1,8 т');
   });
 });

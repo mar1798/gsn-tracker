@@ -155,9 +155,13 @@ async function drain() {
       queue: s.queue.filter((q) => q.id !== head.id),
       failure: failure ?? s.failure,
     }));
-    // Everything of this workout is on the server: refetch it (and the feed's "размечено N/M").
+    // Everything of this workout is on the server: refetch it (and the feed's "размечено N/M")
+    // and the analytics computed from it.
     const settled = !useOutbox.getState().queue.some((q) => q.edit.workoutId === workoutId);
-    if (settled || failure) void queryClient.invalidateQueries({ queryKey: queryKeys.workouts });
+    if (settled || failure) {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.workouts });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.analytics });
+    }
   }
 }
 

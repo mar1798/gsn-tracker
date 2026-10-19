@@ -19,6 +19,8 @@ function updateCatalog(
   const items = update(queryClient.getQueryData<Exercise[]>(queryKeys.exercises) ?? []);
   queryClient.setQueryData(queryKeys.exercises, items);
   cacheExercises(userId, items);
+  // Muscles of a custom exercise feed the muscle analytics.
+  void queryClient.invalidateQueries({ queryKey: queryKeys.analytics });
 }
 
 /** Creates (`id` omitted) or updates a custom exercise. */

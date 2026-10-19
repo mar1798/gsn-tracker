@@ -28,6 +28,13 @@ export const queryKeys = {
   workout: (id: string) => ['workouts', 'detail', id] as const,
   workoutHr: (id: string) => ['workouts', 'hr', id] as const,
   exercises: ['exercises'] as const,
+  /** Prefix of every analytics query: refetched after annotation edits reach the server. */
+  analytics: ['analytics'] as const,
+  overview: (from: string, to: string) => ['analytics', 'overview', from, to] as const,
+  muscles: (from: string, to: string) => ['analytics', 'muscles', from, to] as const,
+  exerciseProgress: (id: string, from: string, to: string) =>
+    ['analytics', 'exercise', id, from, to] as const,
+  records: (before: string | null) => ['analytics', 'records', before] as const,
 };
 
 /** Cached data of `queryKeys.workout`: the server state, before pending edits are applied. */

@@ -1,9 +1,13 @@
 import {
+  analyticsMusclesSchema,
+  analyticsOverviewSchema,
   authResponseSchema,
   exerciseListResponseSchema,
+  exerciseProgressSchema,
   exerciseSchema,
   importFitResponseSchema,
   manualSetSchema,
+  recordsResponseSchema,
   userSchema,
   workoutDetailSchema,
   workoutHrResponseSchema,
@@ -16,6 +20,7 @@ import {
   type LoginRequest,
   type ManualSetInput,
   type ManualSetPatch,
+  type Period,
   type RegisterRequest,
 } from '@gsc/shared';
 import { z } from 'zod';
@@ -91,6 +96,21 @@ export const setsApi = {
     }),
   deleteManual: (id: string) =>
     api.request(`/manual-sets/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+};
+
+export const analyticsApi = {
+  overview: (period: Period) =>
+    api.request('/analytics/overview', { query: { ...period }, schema: analyticsOverviewSchema }),
+  muscles: (period: Period) =>
+    api.request('/analytics/muscles', { query: { ...period }, schema: analyticsMusclesSchema }),
+  exercise: (id: string, period: Period) =>
+    api.request(`/analytics/exercises/${encodeURIComponent(id)}`, {
+      query: { ...period },
+      schema: exerciseProgressSchema,
+    }),
+  /** Bests per exercise; with `before`, only from workouts started earlier. */
+  records: (before?: string) =>
+    api.request('/analytics/records', { query: { before }, schema: recordsResponseSchema }),
 };
 
 export type FitFile = { uri: string; name: string; mimeType?: string | null };

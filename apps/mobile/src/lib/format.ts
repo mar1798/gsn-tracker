@@ -71,3 +71,66 @@ export function formatSetNumbers(numbers: readonly number[]): string {
   }
   return parts.join(', ');
 }
+
+/** 850 → "850 кг", 12 400 → "12,4 т". */
+export function formatVolume(kg: number | null | undefined): string {
+  if (kg == null || !Number.isFinite(kg)) return DASH;
+  if (kg < 1000) return formatNumber(Math.round(kg), 'кг');
+  return formatNumber(Math.round(kg / 100) / 10, 'т');
+}
+
+/** 0.264 → "26 %". */
+export const formatPercent = (share: number | null | undefined) =>
+  share == null || !Number.isFinite(share) ? DASH : `${Math.round(share * 100)} %`;
+
+export type Change = { text: string; direction: 'up' | 'down' | 'flat' };
+
+/** Change against the previous period: "+12 %", "−5 %"; null when there is nothing to compare. */
+export function formatChange(current: number | null, previous: number | null): Change | null {
+  if (current == null || previous == null || previous === 0) return null;
+  const pct = Math.round(((current - previous) / previous) * 100);
+  if (pct === 0) return { text: '0 %', direction: 'flat' };
+  return pct > 0
+    ? { text: `+${pct} %`, direction: 'up' }
+    : { text: `−${Math.abs(pct)} %`, direction: 'down' };
+}
+
+const SHORT_MONTHS = [
+  'янв',
+  'фев',
+  'мар',
+  'апр',
+  'мая',
+  'июн',
+  'июл',
+  'авг',
+  'сен',
+  'окт',
+  'ноя',
+  'дек',
+];
+
+/** Local date "2026-10-17" → "17 окт". */
+export function formatShortDate(date: string): string {
+  const [, month, day] = date.split('-').map(Number);
+  return `${day} ${SHORT_MONTHS[month! - 1]}`;
+}
+
+/** Today in the device time zone as "YYYY-MM-DD". */
+export function localToday(now = new Date()): string {
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+/** A personal record: "80 кг × 3" for the heaviest set, "101,3 кг" or "1,8 т" otherwise. */
+export function formatRecord(
+  kind: 'maxWeight' | 'maxE1rm' | 'maxSetVolume' | 'maxWorkoutVolume',
+  valueKg: number,
+  reps: number | null,
+): string {
+  if (kind === 'maxSetVolume' || kind === 'maxWorkoutVolume') return formatVolume(valueKg);
+  const weight = formatNumber(Math.round(valueKg * 10) / 10, 'кг');
+  return kind === 'maxWeight' && reps ? `${weight} × ${reps}` : weight;
+}
