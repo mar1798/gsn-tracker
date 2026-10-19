@@ -33,10 +33,7 @@ export const userSchema = z.object({
 });
 export type User = z.infer<typeof userSchema>;
 
-const email = z
-  .email()
-  .max(254)
-  .transform((v) => v.trim().toLowerCase());
+const email = z.string().trim().toLowerCase().pipe(z.email().max(254));
 
 export const registerRequestSchema = z.object({
   email,

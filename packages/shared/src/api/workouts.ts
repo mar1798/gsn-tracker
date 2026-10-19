@@ -159,8 +159,18 @@ export const manualSetInputSchema = z
   .strict();
 export type ManualSetInput = z.input<typeof manualSetInputSchema>;
 
-export const manualSetPatchSchema = manualSetInputSchema
-  .extend({ orderIndex: z.number().int().min(0).max(10_000) })
+// Spelled out: `.partial()` of the input schema would keep its defaults and null omitted fields.
+export const manualSetPatchSchema = z
+  .object({
+    exerciseId: z.uuid().nullable(),
+    weightKg: weightKg.nullable(),
+    reps: reps.nullable(),
+    rpe: rpe.nullable(),
+    isWarmup: z.boolean(),
+    isFailure: z.boolean(),
+    note: note.nullable(),
+    orderIndex: z.number().int().min(0).max(10_000),
+  })
   .partial()
   .strict();
 export type ManualSetPatch = z.input<typeof manualSetPatchSchema>;
