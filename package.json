@@ -14,6 +14,9 @@
     "format:check": "prettier --check .",
     "db:up": "docker compose up -d postgres s3 s3-init",
     "db:down": "docker compose down",
+    "db:migrate": "pnpm --filter @gsc/api db:migrate",
+    "db:seed": "pnpm --filter @gsc/api db:seed",
+    "db:generate": "pnpm --filter @gsc/api db:generate",
     "fit:dump": "pnpm --filter @gsc/fit-parser fit:dump",
     "fit:sets": "pnpm --filter @gsc/fit-parser fit:sets"
   },
