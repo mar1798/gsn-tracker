@@ -21,6 +21,7 @@ import { dismissOutboxFailure, useOutbox } from '@/lib/outbox';
 import { colors, radii, spacing } from '@/theme';
 
 import { GarminSetRow, ManualSetRow } from './set-row';
+import { WorkoutSummary } from './workout-summary';
 
 type Row = { kind: 'garmin'; set: WorkoutSet } | { kind: 'manual'; set: ManualSet };
 
@@ -276,6 +277,8 @@ export function WorkoutDetailScreen({ id }: { id: string }) {
             Часы пропустили подход? Добавьте его вручную
           </AppText>
         ) : null}
+
+        {!selecting ? <WorkoutSummary workout={workout} hr={hr.data ?? null} byId={byId} /> : null}
       </ScrollView>
 
       {selecting ? (

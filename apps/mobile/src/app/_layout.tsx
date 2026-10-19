@@ -68,6 +68,10 @@ export default function RootLayout() {
             <Stack.Screen name="manual-set" options={sheetOptions} />
             <Stack.Screen name="exercises/[id]" options={{ headerShown: true, title: '' }} />
             <Stack.Screen name="exercise-form" options={{ presentation: 'modal' }} />
+            <Stack.Screen
+              name="exercise-progress/[id]"
+              options={{ headerShown: true, title: '' }}
+            />
           </Stack.Protected>
           <Stack.Protected guard={!signedIn}>
             <Stack.Screen name="sign-in" />

@@ -1,11 +1,5 @@
-import { ComingSoonScreen } from '@/screens/coming-soon';
+import { ProgressScreen } from '@/screens/progress/progress';
 
 export default function ProgressTab() {
-  return (
-    <ComingSoonScreen
-      title="Прогресс"
-      icon="chart.bar.xaxis"
-      message="Тепловая карта мышц, объём и рекорды появятся, когда вы разметите тренировки."
-    />
-  );
+  return <ProgressScreen />;
 }

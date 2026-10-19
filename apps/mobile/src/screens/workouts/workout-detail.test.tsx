@@ -1,7 +1,7 @@
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import { ApiError } from '@/lib/api/client';
-import { exercisesApi, workoutsApi } from '@/lib/api/endpoints';
+import { analyticsApi, exercisesApi, workoutsApi } from '@/lib/api/endpoints';
 import { getCachedWorkout } from '@/lib/db/detail-cache';
 import { enqueueEdit, loadOutbox, resetOutbox } from '@/lib/outbox';
 import { BENCH, CATALOG, garminSet, WORKOUT_ID, workoutDetail } from '@/test/fixtures';
@@ -12,6 +12,7 @@ import { WorkoutDetailScreen } from './workout-detail';
 jest.mock('@/lib/api/endpoints', () => ({
   workoutsApi: { get: jest.fn(), hr: jest.fn() },
   exercisesApi: { list: jest.fn() },
+  analyticsApi: { records: jest.fn() },
   // Edits stay queued: the screen must show them before the server confirms.
   setsApi: {
     putAnnotation: jest.fn(() => new Promise(() => undefined)),
@@ -69,6 +70,51 @@ describe('WorkoutDetailScreen', () => {
       bpm: [100, 150],
     });
     jest.mocked(exercisesApi.list).mockResolvedValue({ items: CATALOG });
+    jest.mocked(analyticsApi.records).mockResolvedValue({ items: [] });
+  });
+
+  it('sums up the annotated workout and shows new records against earlier bests', async () => {
+    const confirmed = (n: number, weightKg: number) =>
+      garminSet(n, {
+        effective: {
+          ...garminSet(n).effective,
+          exerciseId: BENCH.id,
+          weightKg,
+          reps: 10,
+          repsSource: 'user',
+        },
+      });
+    get.mockResolvedValue(workoutDetail([confirmed(1, 60), confirmed(2, 70), garminSet(3)]));
+    jest.mocked(analyticsApi.records).mockResolvedValue({
+      items: [
+        {
+          exerciseId: BENCH.id,
+          maxWeight: { valueKg: 65, reps: 10, workoutId: WORKOUT_ID, date: '2026-10-10' },
+          maxE1rm: null,
+          maxSetVolume: null,
+          maxWorkoutVolume: {
+            valueKg: 2000,
+            reps: null,
+            workoutId: WORKOUT_ID,
+            date: '2026-10-10',
+          },
+        },
+      ],
+    });
+    await renderDetail();
+
+    expect(await screen.findByText('Итог тренировки')).toBeTruthy();
+    expect(screen.getByLabelText('Объём: 1,3 т')).toBeTruthy();
+    expect(screen.getByLabelText('Рабочие подходы: 2')).toBeTruthy();
+    expect(analyticsApi.records).toHaveBeenCalledWith('2026-10-17T12:05:00.000Z');
+    expect(await screen.findByText('Новый личный рекорд')).toBeTruthy();
+    expect(screen.getByText(/Макс\. вес 70 кг \(было 65 кг\)/)).toBeTruthy();
+  });
+
+  it('has no summary before any set is annotated', async () => {
+    await renderDetail();
+    await screen.findByText('Подходы · 4');
+    expect(screen.queryByText('Итог тренировки')).toBeNull();
   });
 
   it('lists the sets with watch reps and flags double presses', async () => {

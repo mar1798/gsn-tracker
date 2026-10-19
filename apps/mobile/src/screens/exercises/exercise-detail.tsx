@@ -95,6 +95,14 @@ function ExerciseDetail({ exercise }: { exercise: Exercise }) {
         </View>
       </View>
 
+      <Button
+        title="Прогресс"
+        icon="chart.line.uptrend.xyaxis"
+        variant="secondary"
+        block
+        onPress={() => router.push(`/exercise-progress/${exercise.id}`)}
+      />
+
       {exercise.isArchived ? (
         <Banner
           icon="archivebox"
