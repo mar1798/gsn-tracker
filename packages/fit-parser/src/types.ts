@@ -2,7 +2,7 @@
 export const SUSPICIOUS_MIN_DURATION_SEC = 5;
 
 /** HR keeps rising after a set ends, so `hrPeak` looks this far past the set end. */
-export const HR_PEAK_WINDOW_AFTER_SEC = 30;
+export { HR_PEAK_WINDOW_AFTER_SEC } from '@gsc/shared';
 
 export type SetSuspicion = 'too_short';
 
