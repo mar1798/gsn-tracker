@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 
-import { Banner } from '@/components/banner';
+import { Banner, BannerAction } from '@/components/banner';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { EmptyState } from '@/components/empty-state';
@@ -124,7 +124,12 @@ export function ProgressScreen() {
             <WeeklyCard overview={o} muscles={muscles.data} />
           </>
         ) : muscles.isError ? (
-          <Banner tone="danger" icon="exclamationmark.triangle" message={muscles.error.message} />
+          <Banner
+            tone="danger"
+            icon="exclamationmark.triangle"
+            message={muscles.error.message}
+            action={<BannerAction label="Повторить" onPress={() => void muscles.refetch()} />}
+          />
         ) : (
           <Skeleton height={300} radius={radii.lg} />
         )}

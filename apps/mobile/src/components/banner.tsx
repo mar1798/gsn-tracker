@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { colors, radii, spacing } from '@/theme';
 
@@ -30,6 +30,17 @@ export function Banner({
       </AppText>
       {action}
     </View>
+  );
+}
+
+/** Text button at the end of a banner: "Повторить", "Скрыть". */
+export function BannerAction({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable accessibilityRole="button" hitSlop={spacing.md} onPress={onPress}>
+      <AppText variant="label" color="danger">
+        {label}
+      </AppText>
+    </Pressable>
   );
 }
 

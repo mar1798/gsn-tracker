@@ -2,6 +2,7 @@ import { RECORD_KINDS, type RecordsResponse } from '@gsc/shared';
 import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
+import { Banner, BannerAction } from '@/components/banner';
 import { Card, PressableCard } from '@/components/card';
 import { Icon } from '@/components/icon';
 import { Skeleton } from '@/components/skeleton';
@@ -36,6 +37,13 @@ export function RecordsCard({ onOpen }: { onOpen: (exerciseId: string) => void }
       <AppText variant="heading">Рекорды</AppText>
       {records.isPending ? (
         <Skeleton height={120} radius={radii.md} />
+      ) : records.isError ? (
+        <Banner
+          tone="danger"
+          icon="exclamationmark.triangle"
+          message={records.error.message}
+          action={<BannerAction label="Повторить" onPress={() => void records.refetch()} />}
+        />
       ) : items.length === 0 ? (
         <AppText color="textSecondary">
           Рекорды появятся, когда вы укажете вес и подтвердите повторы в подходах.

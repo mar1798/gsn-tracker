@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/empty-state';
 import { Screen } from '@/components/screen';
 import { useImportFit } from '@/hooks/use-import-fit';
 import type { LocalFile } from '@/lib/fit-file';
+import { hapticError, hapticSuccess } from '@/lib/haptics';
 import { colors, spacing } from '@/theme';
 
 /** Uploads one FIT file (picked in the app or opened from another app) and opens the workout. */
@@ -19,7 +20,11 @@ export function ImportFitScreen({ file }: { file: LocalFile | null }) {
   const upload = () => {
     if (!file) return;
     mutate(file, {
-      onSuccess: ({ workoutId }) => router.replace(`/workouts/${workoutId}`),
+      onSuccess: ({ workoutId }) => {
+        void hapticSuccess();
+        router.replace(`/workouts/${workoutId}`);
+      },
+      onError: () => void hapticError(),
     });
   };
 

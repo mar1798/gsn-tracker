@@ -10,6 +10,8 @@ import { colors, radii, typography } from '@/theme';
 
 void SplashScreen.preventAutoHideAsync();
 
+export { CrashScreen as ErrorBoundary } from '@/screens/crash';
+
 const theme = {
   ...DarkTheme,
   colors: {

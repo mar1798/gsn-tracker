@@ -19,7 +19,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/app-text';
-import { Banner } from '@/components/banner';
+import { Banner, BannerAction } from '@/components/banner';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { EmptyState } from '@/components/empty-state';
@@ -213,18 +213,7 @@ export function WorkoutDetailScreen({ id }: { id: string }) {
             tone="danger"
             icon="exclamationmark.triangle"
             message={`Правка не сохранена: ${failure.message}`}
-            action={
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Скрыть"
-                hitSlop={spacing.md}
-                onPress={dismissOutboxFailure}
-              >
-                <AppText variant="label" color="danger">
-                  Скрыть
-                </AppText>
-              </Pressable>
-            }
+            action={<BannerAction label="Скрыть" onPress={dismissOutboxFailure} />}
           />
         ) : null}
 
@@ -266,6 +255,13 @@ export function WorkoutDetailScreen({ id }: { id: string }) {
           </Card>
         ) : hr.isPending ? (
           <Skeleton height={180} radius={radii.lg} />
+        ) : hr.isError ? (
+          <Banner
+            tone="danger"
+            icon="waveform.path.ecg"
+            message={`График пульса не загрузился: ${hr.error.message}`}
+            action={<BannerAction label="Повторить" onPress={() => void hr.refetch()} />}
+          />
         ) : null}
 
         <View style={styles.sectionHeader}>
