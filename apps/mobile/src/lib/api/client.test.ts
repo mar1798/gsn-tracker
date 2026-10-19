@@ -49,6 +49,20 @@ function setup(initial: Tokens | null = { accessToken: 'access-0', refreshToken:
 const okSchema = z.object({ ok: z.boolean() });
 
 describe('createApiClient', () => {
+  it('returns a text body as is', async () => {
+    const { api, fetchFn } = setup();
+    fetchFn.mockResolvedValueOnce(new Response('a,b\r\n1,2\r\n', { status: 200 }));
+    await expect(api.request<string>('/export/csv', { text: true })).resolves.toBe(
+      'a,b\r\n1,2\r\n',
+    );
+
+    fetchFn.mockResolvedValueOnce(json(500, { error: 'internal', message: 'Сбой' }));
+    await expect(api.request<string>('/export/csv', { text: true })).rejects.toMatchObject({
+      status: 500,
+      message: 'Сбой',
+    });
+  });
+
   it('sends the access token, query and JSON body, and parses the response', async () => {
     const { api, fetchFn, authHeader } = setup();
     fetchFn.mockResolvedValueOnce(json(200, { ok: true }));

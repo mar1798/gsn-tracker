@@ -1,6 +1,6 @@
 import type { LoginRequest, RegisterRequest } from '@gsc/shared';
 
-import { authApi } from '@/lib/api/endpoints';
+import { authApi, meApi } from '@/lib/api/endpoints';
 import { clearLocalCache } from '@/lib/db/workout-cache';
 import { loadOutbox, resetOutbox } from '@/lib/outbox';
 import { queryClient } from '@/lib/query-client';
@@ -18,6 +18,12 @@ export async function signOut() {
   const refreshToken = useSession.getState().tokens?.refreshToken;
   // Best effort: an offline sign-out still ends the session on the device.
   if (refreshToken) await authApi.logout(refreshToken).catch(() => undefined);
+  await clearSession();
+}
+
+/** Deletes the account and all its data on the server, then ends the session on the device. */
+export async function deleteAccount() {
+  await meApi.remove();
   await clearSession();
 }
 

@@ -6,3 +6,10 @@ export const hapticSelection = () => Haptics.selectionAsync().catch(() => undefi
 
 export const hapticSuccess = () =>
   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => undefined);
+
+/** Before a destructive confirmation. */
+export const hapticWarning = () =>
+  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => undefined);
+
+export const hapticError = () =>
+  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => undefined);

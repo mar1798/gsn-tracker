@@ -22,6 +22,7 @@ import {
   type ManualSetPatch,
   type Period,
   type RegisterRequest,
+  type UserSettingsPatch,
 } from '@gsc/shared';
 import { z } from 'zod';
 
@@ -43,6 +44,15 @@ export const authApi = {
 
 export const meApi = {
   get: () => api.request('/me', { schema: userSchema }),
+  updateSettings: (body: UserSettingsPatch) =>
+    api.request('/me/settings', { method: 'PATCH', body, schema: userSchema }),
+  /** Deletes the account with all its data. */
+  remove: () => api.request('/me', { method: 'DELETE' }),
+};
+
+export const exportApi = {
+  /** Every set as CSV (UTF-8 with BOM). */
+  setsCsv: () => api.request<string>('/export/csv', { text: true }),
 };
 
 export const workoutsApi = {

@@ -45,6 +45,8 @@ export type RequestOptions<T> = {
   query?: Record<string, string | number | undefined>;
   /** Response body schema; omit for empty (204) responses. */
   schema?: z.ZodType<T>;
+  /** Return the body as text (CSV export) instead of parsing JSON. */
+  text?: boolean;
   /** Send the access token and refresh it on 401. Default `true`. */
   auth?: boolean;
 };
@@ -120,13 +122,17 @@ export function createApiClient({
       res = await send(path, options, tokens.get()?.accessToken);
     }
 
-    return readBody(res, options.schema);
+    return readBody(res, options.schema, options.text);
   }
 
   return { request };
 }
 
-async function readBody<T>(res: Response, schema: z.ZodType<T> | undefined): Promise<T> {
+async function readBody<T>(
+  res: Response,
+  schema: z.ZodType<T> | undefined,
+  asText = false,
+): Promise<T> {
   const text = await res.text().catch(() => '');
   let json: unknown;
   try {
@@ -143,6 +149,7 @@ async function readBody<T>(res: Response, schema: z.ZodType<T> | undefined): Pro
     throw new ApiError(res.status, 'http_error', `Ошибка сервера (${res.status})`, json);
   }
 
+  if (asText) return text as T;
   if (!schema) return undefined as T;
   const parsed = schema.safeParse(json);
   if (!parsed.success) throw new ApiError(res.status, 'bad_response', BAD_RESPONSE_MESSAGE);
