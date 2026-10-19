@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- GSC Tracker: a dumbbell of rounded chart bars, the handle is a heart-rate spike. -->
+  <g fill="#D6F45B">
+    <rect x="165" y="362" width="70" height="300" rx="35" opacity="0.55"/>
+    <rect x="255" y="282" width="90" height="460" rx="45"/>
+    <rect x="679" y="282" width="90" height="460" rx="45"/>
+    <rect x="789" y="362" width="70" height="300" rx="35" opacity="0.55"/>
+  </g>
+  <polyline points="345,512 430,512 470,392 520,632 560,462 594,512 679,512"
+    fill="none" stroke="#D6F45B" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

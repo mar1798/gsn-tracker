@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 640">
+  <!-- Splash: the glyph with the "GSC Tracker" wordmark, on the theme background (set in app.json). -->
+  <g transform="translate(400 250) scale(0.62) translate(-512 -512)">
+    <g fill="#D6F45B">
+      <rect x="165" y="362" width="70" height="300" rx="35" opacity="0.55"/>
+      <rect x="255" y="282" width="90" height="460" rx="45"/>
+      <rect x="679" y="282" width="90" height="460" rx="45"/>
+      <rect x="789" y="362" width="70" height="300" rx="35" opacity="0.55"/>
+    </g>
+    <polyline points="345,512 430,512 470,392 520,632 560,462 594,512 679,512"
+      fill="none" stroke="#D6F45B" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="400" y="560" text-anchor="middle" fill="#F4F5EF"
+    font-family="-apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif"
+    font-size="84" font-weight="800" letter-spacing="-1.5">GSC <tspan fill="#D6F45B">Tracker</tspan></text>
+</svg>
