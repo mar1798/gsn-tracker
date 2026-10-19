@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import '@/lib/auth';
 import { queryClient } from '@/lib/query-client';
 import { restoreSession, useSession } from '@/lib/session';
-import { colors, typography } from '@/theme';
+import { colors, radii, typography } from '@/theme';
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -20,6 +20,15 @@ const theme = {
     border: colors.border,
     primary: colors.accent,
   },
+};
+
+/** Native iOS sheet for the set editor (keeps the workout visible behind it). */
+const sheetOptions = {
+  presentation: 'formSheet' as const,
+  sheetAllowedDetents: [1],
+  sheetGrabberVisible: true,
+  sheetCornerRadius: radii.xl,
+  contentStyle: { backgroundColor: colors.background },
 };
 
 export default function RootLayout() {
@@ -55,6 +64,8 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="workouts/[id]" options={{ headerShown: true, title: '' }} />
             <Stack.Screen name="import" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="annotate" options={sheetOptions} />
+            <Stack.Screen name="manual-set" options={sheetOptions} />
           </Stack.Protected>
           <Stack.Protected guard={!signedIn}>
             <Stack.Screen name="sign-in" />
