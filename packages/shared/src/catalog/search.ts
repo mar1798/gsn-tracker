@@ -32,3 +32,31 @@ export function searchExercises<T extends SearchableExercise>(
   // Array#sort is stable: ties keep the input order.
   return scored.sort((a, b) => Number(b.prefix) - Number(a.prefix)).map((s) => s.item);
 }
+
+export interface FilterableExercise extends SearchableExercise {
+  isCustom: boolean;
+  isArchived: boolean;
+  muscles: readonly { muscle: string; role: 'primary' | 'secondary' }[];
+}
+
+export interface ExerciseFilter {
+  query?: string;
+  /** Muscle group slug: exercises working it, the ones where it is primary first. */
+  muscle?: string | null;
+  customOnly?: boolean;
+}
+
+/** The catalog screen: active exercises matching the search and the chips. */
+export function filterExercises<T extends FilterableExercise>(
+  items: readonly T[],
+  { query = '', muscle = null, customOnly = false }: ExerciseFilter,
+): T[] {
+  const visible = items.filter((e) => !e.isArchived && (!customOnly || e.isCustom));
+  const found = searchExercises(visible, query);
+  if (!muscle) return found;
+
+  const role = (e: T) => e.muscles.find((m) => m.muscle === muscle)?.role;
+  const primary = found.filter((e) => role(e) === 'primary');
+  const secondary = found.filter((e) => role(e) === 'secondary');
+  return [...primary, ...secondary];
+}

@@ -160,6 +160,8 @@ export const exercises = pgTable(
     garminCategory: text('garmin_category'),
     /** FIT `<category>ExerciseName` value, e.g. `barbellBenchPress`. */
     garminSubcategory: text('garmin_subcategory'),
+    /** Soft delete of a custom exercise: annotated sets keep pointing at it. */
+    archivedAt: timestamp('archived_at', { withTimezone: true }),
     createdAt: createdAt(),
   },
   (t) => [index('exercises_user_idx').on(t.userId)],
