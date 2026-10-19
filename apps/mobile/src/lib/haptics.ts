@@ -1,0 +1,8 @@
+import * as Haptics from 'expo-haptics';
+
+// Haptics are a nicety: a device without a Taptic Engine (or a test) must not fail an action.
+
+export const hapticSelection = () => Haptics.selectionAsync().catch(() => undefined);
+
+export const hapticSuccess = () =>
+  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => undefined);

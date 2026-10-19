@@ -1,4 +1,4 @@
-import type { WorkoutDetail, WorkoutSet, WorkoutSummary } from '@gsc/shared';
+import type { Exercise, WorkoutDetail, WorkoutSet, WorkoutSummary } from '@gsc/shared';
 
 export const uuid = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 
@@ -67,3 +67,26 @@ export function workoutDetail(
     ...overrides,
   };
 }
+
+export function exercise(n: number, nameRu: string, overrides: Partial<Exercise> = {}): Exercise {
+  return {
+    id: uuid(500 + n),
+    slug: null,
+    nameRu,
+    nameEn: null,
+    equipment: 'barbell',
+    mechanics: 'compound',
+    isBodyweight: false,
+    isCustom: false,
+    garminCategory: null,
+    garminExerciseName: null,
+    muscles: [{ muscle: 'chest', role: 'primary', coefficient: 1 }],
+    ...overrides,
+  };
+}
+
+export const BENCH = exercise(1, 'Жим штанги лёжа');
+export const ROW = exercise(2, 'Тяга штанги в наклоне', {
+  muscles: [{ muscle: 'lats', role: 'primary', coefficient: 1 }],
+});
+export const CATALOG = [BENCH, ROW];

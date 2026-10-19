@@ -2,11 +2,10 @@ import type { WorkoutSummary } from '@gsc/shared';
 import { useRouter } from 'expo-router';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
-import { AppText } from '@/components/app-text';
+import { Banner } from '@/components/banner';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { EmptyState } from '@/components/empty-state';
-import { Icon } from '@/components/icon';
 import { Screen, ScreenHeader } from '@/components/screen';
 import { Skeleton } from '@/components/skeleton';
 import { usePickFitFile } from '@/hooks/use-pick-fit-file';
@@ -91,11 +90,8 @@ export function WorkoutFeedScreen({ userId }: { userId: string }) {
 
 function OfflineBanner() {
   return (
-    <View style={styles.banner} accessibilityRole="alert">
-      <Icon name="wifi.slash" size={16} color="textSecondary" />
-      <AppText variant="label" color="textSecondary" style={styles.bannerText}>
-        Нет связи с сервером — показаны сохранённые тренировки
-      </AppText>
+    <View style={styles.banner}>
+      <Banner icon="wifi.slash" message="Нет связи с сервером — показаны сохранённые тренировки" />
     </View>
   );
 }
@@ -120,15 +116,5 @@ const styles = StyleSheet.create({
   item: { paddingHorizontal: spacing.lg, paddingBottom: spacing.md },
   footer: { paddingVertical: spacing.lg },
   skeletons: { paddingHorizontal: spacing.lg, gap: spacing.md },
-  banner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-    padding: spacing.md,
-    borderRadius: radii.md,
-    backgroundColor: colors.surface,
-  },
-  bannerText: { flex: 1 },
+  banner: { marginHorizontal: spacing.lg, marginBottom: spacing.md },
 });

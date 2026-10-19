@@ -1,4 +1,10 @@
-import { formatDuration, formatNumber, formatWorkoutDate } from './format';
+import {
+  formatDuration,
+  formatNumber,
+  formatWorkoutDate,
+  formatSetLoad,
+  formatSetNumbers,
+} from './format';
 
 describe('formatDuration', () => {
   it.each([
@@ -43,5 +49,23 @@ describe('formatNumber', () => {
     expect(formatNumber(802, 'ккал')).toBe('802 ккал');
     expect(formatNumber(78.25, 'кг')).toBe('78,3 кг');
     expect(formatNumber(null, 'уд/мин')).toBe('—');
+  });
+});
+
+describe('formatSetLoad', () => {
+  it('shows weight and reps when known', () => {
+    expect(formatSetLoad(62.5, 8)).toBe('62,5 кг × 8');
+    expect(formatSetLoad(60, null)).toBe('60 кг');
+    expect(formatSetLoad(null, 12)).toBe('12 повт.');
+    expect(formatSetLoad(null, null)).toBeNull();
+  });
+});
+
+describe('formatSetNumbers', () => {
+  it('collapses runs of three or more into ranges', () => {
+    expect(formatSetNumbers([4, 1, 2, 3, 7])).toBe('1–4, 7');
+    expect(formatSetNumbers([1, 2, 5])).toBe('1, 2, 5');
+    expect(formatSetNumbers([3])).toBe('3');
+    expect(formatSetNumbers([])).toBe('');
   });
 });

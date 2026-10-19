@@ -47,3 +47,27 @@ export function formatNumber(value: number | null | undefined, unit?: string): s
   const text = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1 }).format(value);
   return unit ? `${text} ${unit}` : text;
 }
+
+/** "60 кг × 12", "60 кг", "12 повт."; `null` when there is neither. */
+export function formatSetLoad(weightKg: number | null, reps: number | null): string | null {
+  const weight = weightKg != null ? formatNumber(weightKg, 'кг') : null;
+  if (weight && reps != null) return `${weight} × ${reps}`;
+  if (weight) return weight;
+  if (reps != null) return `${reps} повт.`;
+  return null;
+}
+
+/** Set numbers as ranges: [1, 2, 3, 4, 7] → "1–4, 7". */
+export function formatSetNumbers(numbers: readonly number[]): string {
+  const sorted = [...new Set(numbers)].sort((a, b) => a - b);
+  const parts: string[] = [];
+  for (let i = 0; i < sorted.length; i++) {
+    const start = sorted[i]!;
+    while (sorted[i + 1] === sorted[i]! + 1) i++;
+    const end = sorted[i]!;
+    parts.push(
+      end - start >= 2 ? `${start}–${end}` : start === end ? `${start}` : `${start}, ${end}`,
+    );
+  }
+  return parts.join(', ');
+}

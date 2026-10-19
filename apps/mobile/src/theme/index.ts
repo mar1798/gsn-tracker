@@ -20,6 +20,7 @@ export const colors = {
   danger: '#FF6B5B',
   dangerMuted: 'rgba(255, 107, 91, 0.14)',
   heartRate: '#FF8A7A',
+  heartRateMuted: 'rgba(255, 138, 122, 0.18)',
   calories: '#FFC35C',
   overlay: 'rgba(0, 0, 0, 0.6)',
 } as const;
