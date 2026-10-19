@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/skeleton';
 import { useMuscleAnalytics, useOverview } from '@/hooks/use-analytics';
 import { usePickFitFile } from '@/hooks/use-pick-fit-file';
 import { formatChange, formatNumber, formatPercent, formatVolume, localToday } from '@/lib/format';
+import { useUnits } from '@/lib/session';
 import { colors, radii, spacing } from '@/theme';
 
 import { HrCard } from './hr-card';
@@ -37,6 +38,7 @@ export function ProgressScreen() {
   const period = useMemo(() => presetPeriod(preset, today), [preset, today]);
   const overview = useOverview(period);
   const muscles = useMuscleAnalytics(period);
+  const units = useUnits();
 
   const o = overview.data;
   const refresh = () => {
@@ -97,7 +99,7 @@ export function ProgressScreen() {
             <Metric
               icon="scalemass.fill"
               label="Объём"
-              value={formatVolume(c.volumeKg)}
+              value={formatVolume(c.volumeKg, units)}
               change={formatChange(c.volumeKg, p.volumeKg)}
             />
             <Metric

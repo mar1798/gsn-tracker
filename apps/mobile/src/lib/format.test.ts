@@ -6,6 +6,7 @@ import {
   formatRecord,
   formatShortDate,
   formatVolume,
+  formatWeight,
   localToday,
   formatWorkoutDate,
   formatSetLoad,
@@ -65,6 +66,13 @@ describe('formatSetLoad', () => {
     expect(formatSetLoad(null, 12)).toBe('12 повт.');
     expect(formatSetLoad(null, null)).toBeNull();
   });
+
+  it('shows the weight in pounds', () => {
+    expect(formatSetLoad(61.235, 8, 'lb')).toBe('135 фнт × 8');
+    expect(formatWeight(100, 'lb')).toBe('220,5 фнт');
+    expect(formatWeight(62.5)).toBe('62,5 кг');
+    expect(formatWeight(null, 'lb')).toBe('—');
+  });
 });
 
 describe('formatSetNumbers', () => {
@@ -82,6 +90,11 @@ describe('analytics formatting', () => {
     expect(formatVolume(12_440)).toBe('12,4 т');
     expect(formatVolume(0)).toBe('0 кг');
     expect(formatVolume(null)).toBe('—');
+  });
+
+  it('formats volume in pounds', () => {
+    expect(formatVolume(1000, 'lb')).toBe('2\u00a0205 фнт');
+    expect(formatVolume(12_440, 'lb')).toBe('27,4 тыс. фнт');
   });
 
   it('formats shares and changes', () => {
@@ -105,5 +118,6 @@ describe('formatRecord', () => {
     expect(formatRecord('maxWeight', 80, 3)).toBe('80 кг × 3');
     expect(formatRecord('maxE1rm', 101.333, null)).toBe('101,3 кг');
     expect(formatRecord('maxWorkoutVolume', 1840, null)).toBe('1,8 т');
+    expect(formatRecord('maxWeight', 102.058, 5, 'lb')).toBe('225 фнт × 5');
   });
 });

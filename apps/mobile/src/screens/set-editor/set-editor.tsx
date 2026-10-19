@@ -3,6 +3,7 @@ import {
   exerciseShortcuts,
   nextSetIds,
   previousExerciseIds,
+  weightStep,
   workingSetsAfter,
   type WorkoutDetail,
   type WorkoutSet,
@@ -22,9 +23,10 @@ import { Skeleton } from '@/components/skeleton';
 import { TextField } from '@/components/text-field';
 import { useExercises } from '@/hooks/use-exercises';
 import { useWorkoutDetail } from '@/hooks/use-workout-detail';
-import { formatDuration, formatNumber, formatSetNumbers } from '@/lib/format';
+import { formatDuration, formatNumber, formatSetNumbers, weightUnitLabel } from '@/lib/format';
 import { hapticSuccess } from '@/lib/haptics';
 import { enqueueEdit, useOutbox } from '@/lib/outbox';
+import { useUnits } from '@/lib/session';
 import { colors, radii, spacing } from '@/theme';
 
 import { ExercisePicker } from './exercise-picker';
@@ -38,6 +40,7 @@ import {
   toBulkPatch,
   toCarryOverPatch,
   toManualSetValues,
+  weightText,
   type SetFormValues,
 } from './set-form';
 
@@ -128,6 +131,7 @@ function SetEditorForm({
   const insets = useSafeAreaInsets();
   const { active, byId } = useExercises();
   const recent = useOutbox((s) => s.recentExerciseIds);
+  const units = useUnits();
 
   const single = target.kind === 'garmin' && sets.length === 1 ? sets[0]! : null;
   const bulk = target.kind === 'garmin' && sets.length > 1;
@@ -141,11 +145,11 @@ function SetEditorForm({
     getValues,
     formState: { errors, dirtyFields, isDirty },
   } = useForm<SetFormValues>({
-    resolver: zodResolver(setFormSchema),
+    resolver: zodResolver(setFormSchema(units)),
     defaultValues: single
-      ? garminSetForm(single)
+      ? garminSetForm(single, units)
       : target.kind === 'manual'
-        ? manualSetForm(manualSet)
+        ? manualSetForm(manualSet, units)
         : EMPTY_FORM,
   });
 
@@ -172,7 +176,7 @@ function SetEditorForm({
     if (getValues('weight') === '') {
       const weight = lastWeightFor(workout, id, sets[0]?.id ?? null);
       if (weight !== null) {
-        setValue('weight', String(weight).replace('.', ','), { shouldDirty: true });
+        setValue('weight', weightText(weight, units), { shouldDirty: true });
       }
     }
   };
@@ -184,7 +188,7 @@ function SetEditorForm({
         kind: 'annotation.put',
         workoutId,
         setId: single.id,
-        input: toAnnotationInput(form),
+        input: toAnnotationInput(form, units),
       });
       const next = form.exerciseId ? nextSetIds(workout.sets, single.id, form.applyNext) : [];
       if (next.length > 0) {
@@ -192,7 +196,7 @@ function SetEditorForm({
           kind: 'annotation.bulk',
           workoutId,
           setIds: next,
-          patch: toCarryOverPatch(form),
+          patch: toCarryOverPatch(form, units),
         });
       }
     } else if (bulk) {
@@ -200,20 +204,20 @@ function SetEditorForm({
         kind: 'annotation.bulk',
         workoutId,
         setIds: sets.map((s) => s.id),
-        patch: toBulkPatch(form, dirtyFields),
+        patch: toBulkPatch(form, dirtyFields, units),
       });
     } else if (manualSet) {
       enqueueEdit({
         kind: 'manualSet.update',
         workoutId,
         id: manualSet.id,
-        patch: toManualSetValues(form),
+        patch: toManualSetValues(form, units),
       });
     } else {
       enqueueEdit({
         kind: 'manualSet.create',
         workoutId,
-        input: { id: randomUUID(), ...toManualSetValues(form) },
+        input: { id: randomUUID(), ...toManualSetValues(form, units) },
       });
     }
     void hapticSuccess();
@@ -304,9 +308,9 @@ function SetEditorForm({
           render={({ field }) => (
             <StepperInput
               label="Вес"
-              unit="кг"
+              unit={weightUnitLabel(units)}
               decimal
-              step={2.5}
+              step={weightStep(units)}
               value={field.value}
               onChange={field.onChange}
               error={errors.weight?.message}

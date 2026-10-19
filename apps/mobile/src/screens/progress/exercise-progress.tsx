@@ -26,8 +26,10 @@ import {
   formatSetLoad,
   formatShortDate,
   formatVolume,
+  formatWeight,
   localToday,
 } from '@/lib/format';
+import { useUnits } from '@/lib/session';
 import { radii, spacing } from '@/theme';
 
 type Range = 'month' | 'quarter' | 'year' | 'all';
@@ -66,6 +68,7 @@ export function ExerciseProgressScreen({ id }: { id: string }) {
   const today = localToday();
   const period = useMemo(() => periodOf(range, today), [range, today]);
   const progress = useExerciseProgress(id, period);
+  const units = useUnits();
   const data = progress.data;
 
   const points = (data?.sessions ?? []).flatMap((s) => {
@@ -73,7 +76,7 @@ export function ExerciseProgressScreen({ id }: { id: string }) {
     return value === null ? [] : [{ key: s.workoutId, label: formatShortDate(s.date), value }];
   });
   const format = (v: number) =>
-    measure === 'volume' ? formatVolume(v) : formatNumber(Math.round(v * 10) / 10, 'кг');
+    measure === 'volume' ? formatVolume(v, units) : formatWeight(v, units);
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -138,7 +141,7 @@ export function ExerciseProgressScreen({ id }: { id: string }) {
                     {RECORD_LABELS[kind]}
                   </AppText>
                   <AppText variant="metric">
-                    {r ? formatRecord(kind, r.valueKg, r.reps) : '—'}
+                    {r ? formatRecord(kind, r.valueKg, r.reps, units) : '—'}
                   </AppText>
                   {r ? (
                     <AppText variant="caption" color="textTertiary">
@@ -162,12 +165,12 @@ export function ExerciseProgressScreen({ id }: { id: string }) {
                     <View style={styles.sessionText}>
                       <AppText variant="bodyStrong">{formatShortDate(s.date)}</AppText>
                       <AppText variant="caption" color="textSecondary">
-                        {formatNumber(s.workingSets)} подх. · {formatVolume(s.volumeKg)}
+                        {formatNumber(s.workingSets)} подх. · {formatVolume(s.volumeKg, units)}
                       </AppText>
                     </View>
                     {recordHere ? <Tag label="Рекорд" tone="accent" /> : null}
                     <AppText variant="bodyStrong">
-                      {formatSetLoad(s.maxWeightKg, s.maxWeightReps) ?? '—'}
+                      {formatSetLoad(s.maxWeightKg, s.maxWeightReps, units) ?? '—'}
                     </AppText>
                   </Card>
                 );

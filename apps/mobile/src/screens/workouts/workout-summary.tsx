@@ -21,7 +21,7 @@ import { Metric } from '@/components/metric';
 import { useRecords } from '@/hooks/use-analytics';
 import { muscleName, RECORD_LABELS } from '@/lib/exercise-labels';
 import { formatNumber, formatPercent, formatRecord, formatVolume } from '@/lib/format';
-import { useSession } from '@/lib/session';
+import { useSession, useUnits } from '@/lib/session';
 import { colors, radii, spacing } from '@/theme';
 
 /**
@@ -40,6 +40,7 @@ export function WorkoutSummary({
 }) {
   const bodyWeightKg = useSession((s) => s.user?.settings.bodyWeightKg ?? null);
   const before = useRecords(workout.startedAt);
+  const units = useUnits();
 
   const summary = useMemo(() => {
     const w = analyticsWorkoutFromDetail(workout, hr, bodyWeightKg);
@@ -79,7 +80,7 @@ export function WorkoutSummary({
           {records.map((r) => (
             <AppText key={`${r.exerciseId}-${r.kind}`} variant="caption" color="textSecondary">
               <AppText variant="label">{byId.get(r.exerciseId)?.nameRu ?? 'Упражнение'}</AppText>
-              {` · ${RECORD_LABELS[r.kind]} ${formatRecord(r.kind, r.valueKg, null)} (было ${formatRecord(r.kind, r.previousKg, null)})`}
+              {` · ${RECORD_LABELS[r.kind]} ${formatRecord(r.kind, r.valueKg, null, units)} (было ${formatRecord(r.kind, r.previousKg, null, units)})`}
             </AppText>
           ))}
         </View>
@@ -96,7 +97,7 @@ export function WorkoutSummary({
         </View>
       </View>
       <View style={styles.metrics}>
-        <Metric icon="scalemass.fill" label="Объём" value={formatVolume(totals.volumeKg)} />
+        <Metric icon="scalemass.fill" label="Объём" value={formatVolume(totals.volumeKg, units)} />
         <Metric
           icon="square.stack.3d.up.fill"
           label="Рабочие подходы"

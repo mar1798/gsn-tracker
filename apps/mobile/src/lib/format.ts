@@ -1,4 +1,7 @@
+import { weightToUnits, type Units } from '@gsc/shared';
+
 // Display formatting (Russian UI). Timestamps are stored in UTC and shown in the device time zone.
+// Weights come in kg and are shown in the user's units (`settings.units`).
 
 const DASH = '—';
 
@@ -48,9 +51,21 @@ export function formatNumber(value: number | null | undefined, unit?: string): s
   return unit ? `${text} ${unit}` : text;
 }
 
+export const weightUnitLabel = (units: Units) => (units === 'lb' ? 'фнт' : 'кг');
+
+/** 62.5 → "62,5 кг"; in pounds "137,8 фнт". */
+export function formatWeight(kg: number | null | undefined, units: Units = 'kg'): string {
+  if (kg == null || !Number.isFinite(kg)) return DASH;
+  return formatNumber(weightToUnits(kg, units), weightUnitLabel(units));
+}
+
 /** "60 кг × 12", "60 кг", "12 повт."; `null` when there is neither. */
-export function formatSetLoad(weightKg: number | null, reps: number | null): string | null {
-  const weight = weightKg != null ? formatNumber(weightKg, 'кг') : null;
+export function formatSetLoad(
+  weightKg: number | null,
+  reps: number | null,
+  units: Units = 'kg',
+): string | null {
+  const weight = weightKg != null ? formatWeight(weightKg, units) : null;
   if (weight && reps != null) return `${weight} × ${reps}`;
   if (weight) return weight;
   if (reps != null) return `${reps} повт.`;
@@ -72,9 +87,14 @@ export function formatSetNumbers(numbers: readonly number[]): string {
   return parts.join(', ');
 }
 
-/** 850 → "850 кг", 12 400 → "12,4 т". */
-export function formatVolume(kg: number | null | undefined): string {
+/** 850 → "850 кг", 12 400 → "12,4 т"; in pounds 8 500 → "8 500 фнт", 27 400 → "27,4 тыс. фнт". */
+export function formatVolume(kg: number | null | undefined, units: Units = 'kg'): string {
   if (kg == null || !Number.isFinite(kg)) return DASH;
+  if (units === 'lb') {
+    const lb = weightToUnits(kg, 'lb');
+    if (lb < 10_000) return formatNumber(Math.round(lb), 'фнт');
+    return formatNumber(Math.round(lb / 100) / 10, 'тыс. фнт');
+  }
   if (kg < 1000) return formatNumber(Math.round(kg), 'кг');
   return formatNumber(Math.round(kg / 100) / 10, 'т');
 }
@@ -129,8 +149,9 @@ export function formatRecord(
   kind: 'maxWeight' | 'maxE1rm' | 'maxSetVolume' | 'maxWorkoutVolume',
   valueKg: number,
   reps: number | null,
+  units: Units = 'kg',
 ): string {
-  if (kind === 'maxSetVolume' || kind === 'maxWorkoutVolume') return formatVolume(valueKg);
-  const weight = formatNumber(Math.round(valueKg * 10) / 10, 'кг');
+  if (kind === 'maxSetVolume' || kind === 'maxWorkoutVolume') return formatVolume(valueKg, units);
+  const weight = formatWeight(valueKg, units);
   return kind === 'maxWeight' && reps ? `${weight} × ${reps}` : weight;
 }

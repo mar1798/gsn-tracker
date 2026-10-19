@@ -1,15 +1,19 @@
-import type {
-  Annotation,
-  AnnotationInput,
-  AnnotationPatch,
-  ManualSet,
-  ManualSetPatch,
-  WorkoutSet,
+import {
+  weightFromUnits,
+  weightToUnits,
+  type Annotation,
+  type AnnotationInput,
+  type AnnotationPatch,
+  type ManualSet,
+  type ManualSetPatch,
+  type Units,
+  type WorkoutSet,
 } from '@gsc/shared';
 import { z } from 'zod';
 
 // Form state of the set editor (annotation sheet and manual set sheet) and its conversion to
 // API payloads. Numbers are kept as strings while typing ("62,5"), converted on save.
+// The weight field is in the user's units; payloads are always kg.
 
 export const RPE_VALUES = [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10] as const;
 
@@ -25,21 +29,40 @@ const inRange = (max: number, integer: boolean) => (text: string) => {
   return n === null || (Number.isFinite(n) && n <= max && (!integer || Number.isInteger(n)));
 };
 
-export const setFormSchema = z.object({
-  exerciseId: z.string().nullable(),
-  weight: z.string().refine(inRange(1000, false), 'Вес — число от 0 до 1000 кг'),
-  reps: z.string().refine(inRange(1000, true), 'Повторы — целое число от 0 до 1000'),
-  rpe: z.number().nullable(),
-  isWarmup: z.boolean(),
-  isFailure: z.boolean(),
-  isExcluded: z.boolean(),
-  note: z.string().max(1000, 'Не длиннее 1000 символов'),
-  /** "Применить упражнение и вес к следующим N подходам" (single Garmin set only). */
-  applyNext: z.number().int().min(0),
-});
-export type SetFormValues = z.infer<typeof setFormSchema>;
+/** The API accepts up to 1000 kg. */
+const MAX_WEIGHT = { kg: 1000, lb: 2200 } as const satisfies Record<Units, number>;
+
+export const setFormSchema = (units: Units) =>
+  z.object({
+    exerciseId: z.string().nullable(),
+    weight: z
+      .string()
+      .refine(
+        inRange(MAX_WEIGHT[units], false),
+        `Вес — число от 0 до ${MAX_WEIGHT[units]} ${units === 'lb' ? 'фнт' : 'кг'}`,
+      ),
+    reps: z.string().refine(inRange(1000, true), 'Повторы — целое число от 0 до 1000'),
+    rpe: z.number().nullable(),
+    isWarmup: z.boolean(),
+    isFailure: z.boolean(),
+    isExcluded: z.boolean(),
+    note: z.string().max(1000, 'Не длиннее 1000 символов'),
+    /** "Применить упражнение и вес к следующим N подходам" (single Garmin set only). */
+    applyNext: z.number().int().min(0),
+  });
+export type SetFormValues = z.infer<ReturnType<typeof setFormSchema>>;
 
 const text = (n: number | null | undefined) => (n == null ? '' : String(n).replace('.', ','));
+
+/** kg → the weight field ("137,5" in pounds). */
+export const weightText = (kg: number | null | undefined, units: Units) =>
+  text(kg == null ? null : weightToUnits(kg, units));
+
+/** The weight field → kg; `null` when empty. */
+function weightKgOf(v: SetFormValues, units: Units): number | null {
+  const value = parseDecimal(v.weight);
+  return value === null ? null : weightFromUnits(value, units);
+}
 
 export const EMPTY_FORM: SetFormValues = {
   exerciseId: null,
@@ -54,12 +77,15 @@ export const EMPTY_FORM: SetFormValues = {
 };
 
 /** One Garmin set: the user's annotation, reps pre-filled from the watch. */
-export function garminSetForm(set: Pick<WorkoutSet, 'annotation' | 'garmin'>): SetFormValues {
+export function garminSetForm(
+  set: Pick<WorkoutSet, 'annotation' | 'garmin'>,
+  units: Units = 'kg',
+): SetFormValues {
   const a: Annotation | null = set.annotation;
   return {
     ...EMPTY_FORM,
     exerciseId: a?.exerciseId ?? null,
-    weight: text(a?.weightKg ?? set.garmin.weightKg),
+    weight: weightText(a?.weightKg ?? set.garmin.weightKg, units),
     reps: text(a?.reps ?? set.garmin.reps),
     rpe: a?.rpe ?? null,
     isWarmup: a?.isWarmup ?? false,
@@ -69,12 +95,12 @@ export function garminSetForm(set: Pick<WorkoutSet, 'annotation' | 'garmin'>): S
   };
 }
 
-export function manualSetForm(set: ManualSet | undefined): SetFormValues {
+export function manualSetForm(set: ManualSet | undefined, units: Units = 'kg'): SetFormValues {
   if (!set) return EMPTY_FORM;
   return {
     ...EMPTY_FORM,
     exerciseId: set.exerciseId,
-    weight: text(set.weightKg),
+    weight: weightText(set.weightKg, units),
     reps: text(set.reps),
     rpe: set.rpe,
     isWarmup: set.isWarmup,
@@ -89,10 +115,13 @@ const note = (s: string) => s.trim() || null;
  * PUT for one set. Saving the sheet confirms what it shows, so pre-filled watch reps
  * become the user's reps (and count towards volume and e1RM).
  */
-export function toAnnotationInput(v: SetFormValues): Required<AnnotationInput> {
+export function toAnnotationInput(
+  v: SetFormValues,
+  units: Units = 'kg',
+): Required<AnnotationInput> {
   return {
     exerciseId: v.exerciseId,
-    weightKg: parseDecimal(v.weight),
+    weightKg: weightKgOf(v, units),
     reps: parseDecimal(v.reps),
     rpe: v.rpe,
     isWarmup: v.isWarmup,
@@ -105,10 +134,10 @@ export function toAnnotationInput(v: SetFormValues): Required<AnnotationInput> {
 type Dirty = Partial<Record<keyof SetFormValues, boolean | undefined>>;
 
 /** Bulk patch: only what the user touched; empty number fields are left alone. */
-export function toBulkPatch(v: SetFormValues, dirty: Dirty): AnnotationPatch {
+export function toBulkPatch(v: SetFormValues, dirty: Dirty, units: Units = 'kg'): AnnotationPatch {
   const patch: AnnotationPatch = {};
   if (dirty.exerciseId) patch.exerciseId = v.exerciseId;
-  const weight = parseDecimal(v.weight);
+  const weight = weightKgOf(v, units);
   if (dirty.weight && weight !== null) patch.weightKg = weight;
   const reps = parseDecimal(v.reps);
   if (dirty.reps && reps !== null) patch.reps = reps;
@@ -121,17 +150,20 @@ export function toBulkPatch(v: SetFormValues, dirty: Dirty): AnnotationPatch {
 }
 
 /** What "применить к следующим" carries over: the exercise and, if set, the weight. */
-export function toCarryOverPatch(v: SetFormValues): AnnotationPatch {
-  const weight = parseDecimal(v.weight);
+export function toCarryOverPatch(v: SetFormValues, units: Units = 'kg'): AnnotationPatch {
+  const weight = weightKgOf(v, units);
   return weight === null
     ? { exerciseId: v.exerciseId }
     : { exerciseId: v.exerciseId, weightKg: weight };
 }
 
-export function toManualSetValues(v: SetFormValues): Required<Omit<ManualSetPatch, 'orderIndex'>> {
+export function toManualSetValues(
+  v: SetFormValues,
+  units: Units = 'kg',
+): Required<Omit<ManualSetPatch, 'orderIndex'>> {
   return {
     exerciseId: v.exerciseId,
-    weightKg: parseDecimal(v.weight),
+    weightKg: weightKgOf(v, units),
     reps: parseDecimal(v.reps),
     rpe: v.rpe,
     isWarmup: v.isWarmup,

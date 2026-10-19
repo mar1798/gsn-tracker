@@ -9,6 +9,7 @@ import { useRecords } from '@/hooks/use-analytics';
 import { useExercises } from '@/hooks/use-exercises';
 import { RECORD_LABELS } from '@/lib/exercise-labels';
 import { formatRecord, formatShortDate } from '@/lib/format';
+import { useUnits } from '@/lib/session';
 import { radii, spacing } from '@/theme';
 
 const SHOWN = 6;
@@ -26,6 +27,7 @@ function latestRecord(item: Item) {
 /** Exercises with their latest personal record; opens the exercise progress. */
 export function RecordsCard({ onOpen }: { onOpen: (exerciseId: string) => void }) {
   const records = useRecords();
+  const units = useUnits();
   const { byId } = useExercises();
   const items = records.data?.items.slice(0, SHOWN) ?? [];
 
@@ -58,7 +60,7 @@ export function RecordsCard({ onOpen }: { onOpen: (exerciseId: string) => void }
                   </AppText>
                 </View>
                 <AppText variant="metric">
-                  {formatRecord(latest.kind, latest.valueKg, latest.reps)}
+                  {formatRecord(latest.kind, latest.valueKg, latest.reps, units)}
                 </AppText>
                 <Icon name="chevron.right" size={14} color="textTertiary" />
               </PressableCard>

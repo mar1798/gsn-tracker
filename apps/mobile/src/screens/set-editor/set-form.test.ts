@@ -10,6 +10,7 @@ import {
   toBulkPatch,
   toCarryOverPatch,
   toManualSetValues,
+  weightText,
 } from './set-form';
 
 const EXERCISE = '00000000-0000-4000-8000-0000000000e1';
@@ -25,13 +26,20 @@ describe('parseDecimal', () => {
 });
 
 describe('setFormSchema', () => {
-  const check = (patch: object) => setFormSchema.safeParse({ ...EMPTY_FORM, ...patch }).success;
+  const check = (patch: object) =>
+    setFormSchema('kg').safeParse({ ...EMPTY_FORM, ...patch }).success;
 
   it('validates weight and reps ranges', () => {
     expect(check({ weight: '62,5', reps: '12' })).toBe(true);
     expect(check({ weight: '1001' })).toBe(false);
     expect(check({ reps: '8,5' })).toBe(false);
     expect(check({ weight: 'abc' })).toBe(false);
+  });
+
+  it('allows up to the same 1000 kg in pounds', () => {
+    const lb = (weight: string) => setFormSchema('lb').safeParse({ ...EMPTY_FORM, weight }).success;
+    expect(lb('2200')).toBe(true);
+    expect(lb('2201')).toBe(false);
   });
 });
 
@@ -117,5 +125,34 @@ describe('payloads', () => {
     const { id: _, orderIndex: __, ...rest } = manual;
     expect(toManualSetValues(manualSetForm(manual))).toEqual(rest);
     expect(manualSetForm(undefined)).toEqual(EMPTY_FORM);
+  });
+
+  it('types pounds and sends kg', () => {
+    const lb = { ...values, weight: '135' };
+    expect(toAnnotationInput(lb, 'lb').weightKg).toBe(61.235);
+    expect(toBulkPatch(lb, { weight: true }, 'lb')).toEqual({ weightKg: 61.235 });
+    expect(toCarryOverPatch(lb, 'lb')).toEqual({ exerciseId: EXERCISE, weightKg: 61.235 });
+    expect(toManualSetValues(lb, 'lb').weightKg).toBe(61.235);
+  });
+
+  it('shows stored kg in pounds and brings them back unchanged', () => {
+    const set = garminSet(1, {
+      annotation: {
+        exerciseId: EXERCISE,
+        weightKg: 61.235,
+        reps: 8,
+        rpe: null,
+        isWarmup: false,
+        isFailure: false,
+        isExcluded: false,
+        note: null,
+        updatedAt: '2026-10-19T10:00:00.000Z',
+      },
+    });
+    const form = garminSetForm(set, 'lb');
+    expect(form.weight).toBe('135');
+    expect(toAnnotationInput(form, 'lb').weightKg).toBe(61.235);
+    expect(weightText(100, 'lb')).toBe('220,5');
+    expect(weightText(null, 'lb')).toBe('');
   });
 });

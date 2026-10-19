@@ -65,3 +65,6 @@ export async function clearSession() {
   useSession.setState(signedOut);
   await persist(null);
 }
+
+/** Weight units for display and input; weights are stored in kg. */
+export const useUnits = () => useSession((s) => s.user?.settings.units ?? 'kg');

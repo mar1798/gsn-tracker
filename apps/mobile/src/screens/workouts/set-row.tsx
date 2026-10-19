@@ -6,6 +6,7 @@ import { AppText } from '@/components/app-text';
 import { Tag } from '@/components/chip';
 import { Icon } from '@/components/icon';
 import { formatDuration, formatNumber, formatSetLoad } from '@/lib/format';
+import { useUnits } from '@/lib/session';
 import { colors, hitSize, radii, spacing } from '@/theme';
 
 type RowProps = {
@@ -21,7 +22,7 @@ type RowProps = {
 /** A Garmin set: exercise (or a prompt), load, duration/rest and peak HR. */
 export function GarminSetRow({ set, ...row }: RowProps & { set: WorkoutSet }) {
   const e = set.effective;
-  const load = formatSetLoad(e.weightKg, e.reps);
+  const load = formatSetLoad(e.weightKg, e.reps, useUnits());
   const fromWatch = e.repsSource === 'garmin';
   return (
     <RowFrame
@@ -64,7 +65,7 @@ export function GarminSetRow({ set, ...row }: RowProps & { set: WorkoutSet }) {
 
 /** A set the watch missed, added by hand. */
 export function ManualSetRow({ set, ...row }: RowProps & { set: ManualSet }) {
-  const load = formatSetLoad(set.weightKg, set.reps);
+  const load = formatSetLoad(set.weightKg, set.reps, useUnits());
   return (
     <RowFrame {...row} label="+" accessibilityLabel="Ручной подход">
       <ExerciseTitle name={row.exerciseName} />

@@ -9,6 +9,7 @@ import { ChangeBadge } from '@/components/change-badge';
 import { muscleName } from '@/lib/exercise-labels';
 import { formatChange, formatNumber, formatVolume } from '@/lib/format';
 import { hapticSelection } from '@/lib/haptics';
+import { useUnits } from '@/lib/session';
 import { colors, radii, spacing } from '@/theme';
 
 const ORDER = new Map<string, number>(MUSCLE_GROUPS.map((m, i) => [m.slug, i]));
@@ -16,6 +17,7 @@ const ORDER = new Map<string, number>(MUSCLE_GROUPS.map((m, i) => [m.slug, i]));
 /** Heat map of the period plus muscles ranked by working sets. */
 export function MusclesCard({ data, periodDays }: { data: AnalyticsMuscles; periodDays: number }) {
   const [selected, setSelected] = useState<string | null>(null);
+  const units = useUnits();
   const worked = data.muscles
     .filter((m) => m.sets > 0)
     .sort((a, b) => b.sets - a.sets || ORDER.get(a.muscle)! - ORDER.get(b.muscle)!);
@@ -57,7 +59,7 @@ export function MusclesCard({ data, periodDays }: { data: AnalyticsMuscles; peri
                 <View style={styles.rowText}>
                   <AppText variant="bodyStrong">{muscleName(m.muscle)}</AppText>
                   <AppText variant="caption" color="textSecondary">
-                    {formatNumber(m.sets)} подх. · {formatVolume(m.volumeKg)}
+                    {formatNumber(m.sets)} подх. · {formatVolume(m.volumeKg, units)}
                   </AppText>
                   <View style={styles.track}>
                     <View style={[styles.fill, { width: `${(m.sets / max) * 100}%` }]} />

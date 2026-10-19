@@ -9,6 +9,7 @@ import { Chip } from '@/components/chip';
 import { Segmented } from '@/components/segmented';
 import { muscleName } from '@/lib/exercise-labels';
 import { formatNumber, formatVolume } from '@/lib/format';
+import { useUnits } from '@/lib/session';
 import { spacing } from '@/theme';
 
 type Measure = 'sets' | 'volume';
@@ -33,6 +34,7 @@ export function WeeklyCard({
   muscles: AnalyticsMuscles;
 }) {
   const [measure, setMeasure] = useState<Measure>('sets');
+  const units = useUnits();
   const [muscle, setMuscle] = useState<string | null>(null);
   const worked = muscles.muscles
     .filter((m) => m.sets > 0)
@@ -74,7 +76,9 @@ export function WeeklyCard({
       <View>
         <BarChart
           bars={bars}
-          formatValue={(v) => (measure === 'sets' ? `${formatNumber(v)} подх.` : formatVolume(v))}
+          formatValue={(v) =>
+            measure === 'sets' ? `${formatNumber(v)} подх.` : formatVolume(v, units)
+          }
         />
       </View>
       {measure === 'volume' ? (
