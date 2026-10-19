@@ -37,7 +37,11 @@ const garminSet = (over: Partial<ExportSetRow> = {}): ExportSetRow => ({
   ...over,
 });
 
-const lines = (csv: string) => csv.replace(/^\uFEFF/, '').trimEnd().split('\r\n');
+const lines = (csv: string) =>
+  csv
+    .replace(/^\uFEFF/, '')
+    .trimEnd()
+    .split('\r\n');
 
 describe('csv', () => {
   it('formats plain values', () => {

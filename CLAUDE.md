@@ -32,6 +32,7 @@ Local env: `cp .env.example .env` (API) and `cp apps/mobile/.env.example apps/mo
   - Styles use only tokens from `src/theme` (no raw colors/sizes in screens). API calls go through `src/lib/api` (zod-parsed, `ApiError` with a Russian message); server state via TanStack Query (`queryKeys` in `src/lib/query-client.ts`).
   - Local SQLite cache: `src/lib/db` (drizzle schema + hand-written migrations in `migrations.ts`; add a new entry for every schema change).
   - Annotation edits go only through `enqueueEdit` (`src/lib/outbox.ts`, offline queue); screens read workouts via `useWorkoutDetail`, which applies pending edits. Never call `setsApi` from components.
+  - Weights are kg everywhere except the UI: display through `formatWeight` / `formatSetLoad` / `formatVolume` with `useUnits()`, convert typed values with `weightFromUnits`.
   - RNTL 14: `render` and `fireEvent` are async, so `await` them. Screen tests use `renderScreens` from `src/test/render.tsx`.
 - `packages/shared`: types, zod schemas, exercise/muscle catalog, analytics formulas.
 - `packages/fit-parser`: FIT → `ParsedWorkout` (`parseFit`). `normalize.ts` is pure (unit-tested on synthetic messages); errors are `FitParseError` with a `code`.
