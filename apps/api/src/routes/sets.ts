@@ -10,7 +10,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { garminSets, manualSets, setAnnotations, workouts } from '../db/schema.js';
 import type { AppDeps } from '../deps.js';
-import { notFound, parse } from '../http.js';
+import { HttpError, notFound, parse } from '../http.js';
 import { assertExerciseVisible } from '../services/exercises.js';
 import { getOwnedWorkout, loadSets, toManualSet } from '../services/workouts.js';
 
@@ -89,8 +89,17 @@ export async function setRoutes(app: FastifyInstance, { db }: AppDeps) {
           orderIndex ??
           sql`(SELECT COALESCE(MAX(order_index), 0) + 1 FROM effective_sets WHERE workout_id = ${id})`,
       })
+      .onConflictDoNothing({ target: manualSets.id })
       .returning();
-    return reply.status(201).send(toManualSet(row!));
+    if (row) return reply.status(201).send(toManualSet(row));
+
+    // Only a client-supplied id can conflict: an offline queue replaying the same create.
+    const [existing] = await db
+      .select()
+      .from(manualSets)
+      .where(and(eq(manualSets.id, input.id!), eq(manualSets.workoutId, id)));
+    if (!existing) throw new HttpError(409, 'id_conflict', 'Подход с таким id уже существует');
+    return reply.status(200).send(toManualSet(existing));
   });
 
   async function getOwnedManualSet(userId: string, id: string) {

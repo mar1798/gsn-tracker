@@ -146,6 +146,11 @@ export type WorkoutSet = z.infer<typeof workoutSetSchema>;
 
 export const manualSetInputSchema = z
   .object({
+    /**
+     * Client-generated id: a set created offline is replayed from the queue, and a replay
+     * with the same id returns the existing set instead of creating a duplicate.
+     */
+    id: z.uuid().optional(),
     exerciseId: z.uuid().nullable().default(null),
     weightKg: weightKg.nullable().default(null),
     reps: reps.nullable().default(null),

@@ -207,6 +207,30 @@ describe('set annotations', () => {
     expect(detail.manualSets.map((s) => s.id)).toEqual([second.id]);
   });
 
+  it('manual sets: a replayed create with a client id returns the existing set', async () => {
+    const url = `/workouts/${workout.id}/manual-sets`;
+    const id = '00000000-0000-4000-8000-00000000c11e';
+    const first = await app.inject({ method: 'POST', url, headers, payload: { id, reps: 8 } });
+    expect(first.statusCode).toBe(201);
+    expect(manualSetSchema.parse(first.json())).toMatchObject({ id, reps: 8, orderIndex: 22 });
+
+    const replay = await app.inject({ method: 'POST', url, headers, payload: { id, reps: 8 } });
+    expect(replay.statusCode).toBe(200);
+    expect(manualSetSchema.parse(replay.json())).toMatchObject({ id, orderIndex: 22 });
+
+    // The same id in another workout (or another user's) is a conflict, not a takeover.
+    const other = await registerUser(app, 'other@example.com');
+    const otherWorkout = await importFixture(app, other.headers);
+    const conflict = await app.inject({
+      method: 'POST',
+      url: `/workouts/${otherWorkout}/manual-sets`,
+      headers: other.headers,
+      payload: { id, reps: 1 },
+    });
+    expect(conflict.statusCode).toBe(409);
+    expect(conflict.json()).toMatchObject({ error: 'id_conflict' });
+  });
+
   it("does not accept another user's custom exercise", async () => {
     const other = await registerUser(app, 'other@example.com');
     const [custom] = await db
